@@ -102,6 +102,9 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headline4,
             ),
+            Container(
+              child: const Text("extracted widget", style: TextStyle(fontWeight: FontWeight.bold),)
+            )
           ],
         ),
       ),
