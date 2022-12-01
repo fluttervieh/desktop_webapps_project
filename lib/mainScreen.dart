@@ -16,6 +16,8 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
 
+    List<String> selectedTags = [];
+
     //some mock data for developement
     List<StoreItem> allItems = [];
     StoreItem s1 = const StoreItem("amazon", "www.amazon.com", "richi", "passwort", []);
@@ -62,10 +64,77 @@ class _MainScreenState extends State<MainScreen> {
         Expanded(
           flex: 1,
           child: Container(
-            color: Colors.red,
+            child: Column(
+              children:  <Widget>[
+                const TextField(decoration: InputDecoration(hintText: "Alias",)),
+                const TextField(decoration: InputDecoration(hintText: "URL",)),
+                const TextField(decoration: InputDecoration(hintText: "Username",)),
+                const TextField(decoration: InputDecoration(hintText: "Password",)),
+                //Tag section
+                Row(
+                  children:  [
+                    TagContainer(title: "Shopping", selectedTags: selectedTags, isSelected: false),
+                    TagContainer(title: "Social Media", selectedTags: selectedTags, isSelected: false),
+                    TagContainer(title: "Other", selectedTags: selectedTags, isSelected: false),
+                    TagContainer(title: "Porn", selectedTags: selectedTags, isSelected: false)
+                  ],
+                )
+
+
+              ],
+            )
           )
         )
       ],
     );
   }
 }
+
+class TagContainer extends StatefulWidget {
+  final String title;
+  final List<String> selectedTags;
+  bool isSelected;
+  TagContainer({
+    required this.title,
+    required this.selectedTags,
+    required this.isSelected,
+
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<TagContainer> createState() => _TagContainerState();
+}
+
+class _TagContainerState extends State<TagContainer> {
+  @override
+  Widget build(BuildContext context) {
+
+    return GestureDetector(
+      onTap: () => setState(() {
+        if(widget.isSelected){
+          widget.isSelected = false;
+          widget.selectedTags.add(widget.title);
+          debugPrint(widget.selectedTags.length.toString());
+        }else{
+          widget.isSelected = true;
+          widget.selectedTags.remove(widget.title);
+        }
+      }),
+      child: Container(
+        
+        decoration: BoxDecoration(
+          color: widget.isSelected? Colors.green: Colors.grey,
+          borderRadius: BorderRadius.circular(16)
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Center(child: Text(widget.title)),
+        ),
+      ),
+    );
+  }
+}
+
+
+
