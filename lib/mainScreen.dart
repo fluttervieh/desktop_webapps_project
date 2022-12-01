@@ -1,5 +1,10 @@
+import 'dart:convert';
+
 import 'package:desktop_webapp/ModelClasses/StoreItem.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:uuid/uuid.dart';
+
 
 class MainScreen extends StatefulWidget {
   const MainScreen({ Key? key }) : super(key: key);
@@ -13,6 +18,30 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
 
+  final storage = FlutterSecureStorage();
+
+  Future<List<StoreItem>> getAllFromStorage()async{
+    List<StoreItem> fetchedStoreItems = [];
+    final all = await storage.readAll();
+
+    all.forEach((key, value) {
+      //parse JSON
+      //StoreItem item = StoreItem.fromJson(value);
+      debugPrint(value);
+      StoreItem item = StoreItem.fromJson(jsonDecode(value));
+      fetchedStoreItems.add(item);
+    });
+
+    return fetchedStoreItems;
+  }
+
+  Future<void>addItemToStore(StoreItem item)async{
+    const uuid = Uuid();
+    String json = jsonEncode(item);
+    debugPrint(json);
+    await storage.write(key: uuid.v4(), value: json);
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -22,7 +51,7 @@ class _MainScreenState extends State<MainScreen> {
     List<StoreItem> allItems = [];
     StoreItem s1 = const StoreItem("amazon", "www.amazon.com", "richi", "passwort", []);
     StoreItem s2 = const StoreItem("instagram", "www.instagram.com", "richard.insta", "anderespasswort", []);
-    StoreItem s3 = const StoreItem("cornhub", "www.cornhub.com", "cornlover", "itscorn", []);
+    StoreItem s3 = const StoreItem("cornhub", "www.cornhub.com", "cornlover", "itscorn", ["social media"]);
 
     allItems.add(s1);
     allItems.add(s2);
@@ -40,19 +69,33 @@ class _MainScreenState extends State<MainScreen> {
                 //searchbar
                 TextField(),
                 Expanded(
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                
-                    itemCount: allItems.length,
-                    itemBuilder: (BuildContext context, int index){
-                      return ListTile(
-                        title: Text(allItems[index].url),
-                        subtitle: Text(allItems[index].username),
-                        tileColor: Colors.white,
-                        hoverColor: Colors.grey,
-                      );
+                  child: FutureBuilder(
+                    future: getAllFromStorage(),
+                    builder: ((BuildContext context, AsyncSnapshot snapshot) {
+                      if(snapshot.hasData){
+                        return ListView.builder(
+                          shrinkWrap: true,        
+                          itemCount: snapshot.data.length,
+                          itemBuilder: (BuildContext context, int index){
+                            return ListTile(
+                              title: Text(snapshot.data[index].url),
+                              subtitle: Text(snapshot.data[index].username),
+                              tileColor: Colors.white,
+                              hoverColor: Colors.grey,
+                            );
+                          }
+                        );
+                      }else{
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
                     }),
-                )
+                  ),
+                ),
+                ElevatedButton(onPressed: ()=> setState(() {
+                  addItemToStore(s3);
+                }), child: Text("add test entry"))
                 //Listview.builder
 
               ],

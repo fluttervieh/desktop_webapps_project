@@ -14,6 +14,22 @@ class StoreItem{
     this.tags
   );
 
+  factory StoreItem.fromJson(Map<String,dynamic> json){
+    return StoreItem(
+      json['identifier'], 
+      json['url'],
+      json['username'],
+      json['password'],
+      json['tags']);
+  }
+
+  Map<String, dynamic> toJson() =>{
+    'identifier': identifier.toString(),
+    'url': url.toString(),
+    'username': username.toString(),
+    'password': password.toString(),
+    'tags:' : tags.toString()
+  };
   
 
 }
