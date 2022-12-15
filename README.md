@@ -42,6 +42,8 @@ samples, guidance on mobile development, and a full API reference.
 
 # How to start the application
 
+# How to start the application
+
 TODO
 ## Install Packages
 
