@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class StoreItem{
   final String identifier;
   final String url;
@@ -20,7 +22,7 @@ class StoreItem{
       json['url'],
       json['username'],
       json['password'],
-      json['tags']);
+      json['tags']==null?[]:json['tags']);
   }
 
   Map<String, dynamic> toJson() =>{
@@ -28,7 +30,7 @@ class StoreItem{
     'url': url.toString(),
     'username': username.toString(),
     'password': password.toString(),
-    'tags:' : tags.toString()
+    'tags:' : jsonEncode(tags)
   };
   
 
