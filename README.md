@@ -19,5 +19,35 @@ samples, guidance on mobile development, and a full API reference.
 
 # TOOD Anforderungen
 
-- passwort verschlüsseln in webasambly
-- designanpassungen platformspezifisch
+## Grundlegende Anforderungen
+- komplette offline funktionalität
+- persistente speicherung von credentials
+
+## TODOs
+- [ ] passwort verschlüsseln in webasambly
+- [ ] beispiel für platformspezifische designanpassungen 
+- [ ] jeder eintrag sollte folgende felder haben
+    - [ ] titel
+    - [ ] username
+    - [ ] password
+    - [ ] url
+- [ ] alle credentials sollten aufgelistet werden können
+- [ ] eintrag hinzufügen
+- [ ] eintrag bearbeiten
+- [ ] eintrag löschen
+- [ ] tags zu einträgen hinzufügen
+- [ ] liste filtern
+    - [ ] über tags
+    - [ ] über titel
+- [ ] passwort verschlüsselt speichern
+    - [ ] idealerweise mit anderer programmiersprache (webasembly)
+    - [ ] entschlüsseln beim lesen (mit masterpasswort?)
+- [ ] Testing
+    - [ ] UI Tests
+    - [ ] Unit Tests
+- [ ] Readme.md mit how to start the application
+
+
+# How to start the application
+
+TODO
