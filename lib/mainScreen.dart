@@ -9,17 +9,52 @@ import 'package:uuid/uuid.dart';
 class MainScreen extends StatefulWidget {
   const MainScreen({ Key? key }) : super(key: key);
 
-  
-
-
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
 
-  
   final storage = FlutterSecureStorage();
+
+  TextEditingController aliasController = TextEditingController();
+  TextEditingController urlController = TextEditingController();
+  TextEditingController usernameController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  String? get _aliasErrorText {
+    final aliasText = aliasController.text;
+    if(aliasText.isEmpty || aliasText == ""){
+      return 'Can\'t be empty';
+    }
+    return null;
+  }
+  String? get _urlErrorText {
+    final urlText = urlController.value.text;
+   
+    if(urlText.isEmpty || urlText == ""){
+      return 'Can\'t be empty';
+    }
+    return null;
+  }
+  String? get _usernameErrorText {
+    final usernameText = usernameController.value.text;
+    if(usernameText.isEmpty || usernameText == ""){
+      return 'Can\'t be empty';
+    }
+    return null;
+  }
+  String? get _passwordErrorText {
+    
+    final passwordText = passwordController.value.text;
+
+    if(passwordText.isEmpty || passwordText == ""){
+      return 'Can\'t be empty';
+    }
+    return null;
+  }
+
+  var _text = '';
 
   Future<List<StoreItem>> getAllFromStorage()async{
     List<StoreItem> fetchedStoreItems = [];
@@ -36,6 +71,7 @@ class _MainScreenState extends State<MainScreen> {
     return fetchedStoreItems;
   }
 
+  //parses json
   Future<void>addItemToStore(StoreItem item)async{
     const uuid = Uuid();
     String json = jsonEncode(item);
@@ -48,23 +84,6 @@ class _MainScreenState extends State<MainScreen> {
 
  
     List<String> selectedTags = [];
-
-    TextEditingController aliasController = TextEditingController();
-    TextEditingController urlController = TextEditingController();
-    TextEditingController usernameController = TextEditingController();
-    TextEditingController passwordController = TextEditingController();
-
-
-    //some mock data for developement
-    List<StoreItem> allItems = [];
-    StoreItem s1 = const StoreItem("amazon", "www.amazon.com", "richi", "passwort", []);
-    StoreItem s2 = const StoreItem("instagram", "www.instagram.com", "richard.insta", "anderespasswort", []);
-    StoreItem s3 = const StoreItem("cornhub", "www.cornhub.com", "cornlover", "itscorn", ["social media"]);
-
-    allItems.add(s1);
-    allItems.add(s2);
-    allItems.add(s3);
-
     List<Widget> allTags = [];
     allTags.add(TagContainer(title: "Shopping", selectedTags: selectedTags, isSelected: selectedTags.contains("Shopping")));
     allTags.add(TagContainer(title: "Social Media", selectedTags: selectedTags, isSelected: selectedTags.contains("Social Media")));
@@ -82,7 +101,7 @@ class _MainScreenState extends State<MainScreen> {
               child: Column(
                 children: <Widget>[
                   //searchbar
-                  TextField(),
+                  const TextField(),
                   Expanded(
                     child: FutureBuilder(
                       future: getAllFromStorage(),
@@ -108,11 +127,6 @@ class _MainScreenState extends State<MainScreen> {
                       }),
                     ),
                   ),
-                  ElevatedButton(onPressed: ()=> setState(() {
-                    addItemToStore(s3);
-                  }), child: Text("add test entry"))
-                  //Listview.builder
-    
                 ],
               ),
             )
@@ -124,16 +138,41 @@ class _MainScreenState extends State<MainScreen> {
             child: Container(
               child: Column(
                 children:  <Widget>[
-                  TextField(controller:aliasController, decoration: const InputDecoration(hintText: "Alias",)),
-                  TextField(controller: urlController, decoration: const InputDecoration(hintText: "URL",)),
-                  TextField(controller: usernameController, decoration: const InputDecoration(hintText: "Username",)),
-                  TextField(controller: passwordController, decoration: const InputDecoration(hintText: "Password",)),
+                 
+                  TextField(
+                    controller:aliasController, 
+                    decoration: InputDecoration(
+                      hintText: "Alias", 
+                      errorText: _aliasErrorText),
+                      onChanged: (text) => setState(() => _text),
+
+                  ),
+                  TextField(
+                    controller: urlController, 
+                    decoration: InputDecoration(
+                      hintText: "URL", 
+                      errorText: _urlErrorText),
+                      onChanged: (text) => setState(() => _text),
+                    ),
+                  TextField(
+                    controller: usernameController, 
+                    decoration: InputDecoration(
+                      hintText: "Username", 
+                      errorText: _usernameErrorText),
+                    onChanged: (text) => setState(() => _text),
+                    ),
+                  TextField(
+                    controller: passwordController,
+                    decoration: InputDecoration(
+                      hintText: "Password",
+                      errorText: _passwordErrorText),
+                      onChanged: (text) => setState(() => _text),
+
+                    ),
                   //Tag section
                   Row(
                     children: allTags,
                   )
-    
-    
                 ],
               )
             )
@@ -142,21 +181,48 @@ class _MainScreenState extends State<MainScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: ()async{
-          String alias = aliasController.text;
-          String url = urlController.text;
-          String username = usernameController.text;
-          String password = passwordController.text;
+          if(validateInputs()){
+            debugPrint("hier komm ich rein");
+            debugPrint(selectedTags.toString());
+            String alias = aliasController.text;
+            String url = urlController.text;
+            String username = usernameController.text;
+            String password = passwordController.text;
+            StoreItem newItem = StoreItem(alias, url, username, password, selectedTags);
+            await addItemToStore(newItem);
 
-          StoreItem newItem = StoreItem(alias, url, username, password, selectedTags);
-          await addItemToStore(newItem);
-          setState(() {
-            selectedTags = [];            
-          });
+            setState(() {
+              selectedTags = [];
+              aliasController.text = "";
+              usernameController.text = "";
+              urlController.text = "";
+              passwordController.text = "";            
+            });
+          }else{
+            return;
+          }
+          
         },
         tooltip: 'add new entry',
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  bool validateInputs(){
+    if(_aliasErrorText != null){
+      return false;
+    }
+    if(_usernameErrorText != null){
+      return false;
+    }
+    if(_urlErrorText != null){
+      return false;
+    }
+    if(_passwordErrorText != null){
+      return false;
+    }
+    return true;
   }
 }
 
@@ -188,10 +254,13 @@ class _TagContainerState extends State<TagContainer> {
       onTap: () => setState(() {
         if(widget.isSelected){
           widget.isSelected = false;
-          widget.selectedTags.add(widget.title);
+          debugPrint(widget.selectedTags.toString());
+          widget.selectedTags.remove(widget.title);
+
         }else{
           widget.isSelected = true;
-          widget.selectedTags.remove(widget.title);
+          widget.selectedTags.add(widget.title);
+
         }
       }),
       child: Container(
@@ -207,10 +276,6 @@ class _TagContainerState extends State<TagContainer> {
       ),
     );
   }
-  
-  setSelectedToDefault()=>{
-    widget.isSelected = false
-  };
 }
 
 

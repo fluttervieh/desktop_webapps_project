@@ -30,7 +30,7 @@ class StoreItem{
     'url': url.toString(),
     'username': username.toString(),
     'password': password.toString(),
-    'tags:' : jsonEncode(tags)
+    'tags:' : tags
   };
   
 
