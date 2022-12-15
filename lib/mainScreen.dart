@@ -18,6 +18,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
 
+  
   final storage = FlutterSecureStorage();
 
   Future<List<StoreItem>> getAllFromStorage()async{
@@ -45,7 +46,14 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
 
+ 
     List<String> selectedTags = [];
+
+    TextEditingController aliasController = TextEditingController();
+    TextEditingController urlController = TextEditingController();
+    TextEditingController usernameController = TextEditingController();
+    TextEditingController passwordController = TextEditingController();
+
 
     //some mock data for developement
     List<StoreItem> allItems = [];
@@ -56,79 +64,98 @@ class _MainScreenState extends State<MainScreen> {
     allItems.add(s1);
     allItems.add(s2);
     allItems.add(s3);
-    
-    return Row(
-      children:<Widget> [
-        //left section of the key manager
-        //in future, we have to wrap this on in a future builder to get the async stuff
-        Expanded(
-          flex: 1,
-          child: Container(
-            child: Column(
-              children: <Widget>[
-                //searchbar
-                TextField(),
-                Expanded(
-                  child: FutureBuilder(
-                    future: getAllFromStorage(),
-                    builder: ((BuildContext context, AsyncSnapshot snapshot) {
-                      if(snapshot.hasData){
-                        return ListView.builder(
-                          shrinkWrap: true,        
-                          itemCount: snapshot.data.length,
-                          itemBuilder: (BuildContext context, int index){
-                            return ListTile(
-                              title: Text(snapshot.data[index].url),
-                              subtitle: Text(snapshot.data[index].username),
-                              tileColor: Colors.white,
-                              hoverColor: Colors.grey,
-                            );
-                          }
-                        );
-                      }else{
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-                    }),
+
+    List<Widget> allTags = [];
+    allTags.add(TagContainer(title: "Shopping", selectedTags: selectedTags, isSelected: selectedTags.contains("Shopping")));
+    allTags.add(TagContainer(title: "Social Media", selectedTags: selectedTags, isSelected: selectedTags.contains("Social Media")));
+    allTags.add(TagContainer(title: "Other", selectedTags: selectedTags, isSelected: selectedTags.contains("Other")));
+    allTags.add(TagContainer(title: "Porn", selectedTags: selectedTags, isSelected: selectedTags.contains("Porn")));
+  
+    return Scaffold(
+      body: Row(
+        children:<Widget> [
+          //left section of the key manager
+          //in future, we have to wrap this on in a future builder to get the async stuff
+          Expanded(
+            flex: 1,
+            child: Container(
+              child: Column(
+                children: <Widget>[
+                  //searchbar
+                  TextField(),
+                  Expanded(
+                    child: FutureBuilder(
+                      future: getAllFromStorage(),
+                      builder: ((BuildContext context, AsyncSnapshot snapshot) {
+                        if(snapshot.hasData){
+                          return ListView.builder(
+                            shrinkWrap: true,        
+                            itemCount: snapshot.data.length,
+                            itemBuilder: (BuildContext context, int index){
+                              return ListTile(
+                                title: Text(snapshot.data[index].url),
+                                subtitle: Text(snapshot.data[index].username),
+                                tileColor: Colors.white,
+                                hoverColor: Colors.grey,
+                              );
+                            }
+                          );
+                        }else{
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                      }),
+                    ),
                   ),
-                ),
-                ElevatedButton(onPressed: ()=> setState(() {
-                  addItemToStore(s3);
-                }), child: Text("add test entry"))
-                //Listview.builder
-
-              ],
-            ),
-          )
-        ),
-        //right section
-        //here we can view our passwords or create a new entry
-        Expanded(
-          flex: 1,
-          child: Container(
-            child: Column(
-              children:  <Widget>[
-                const TextField(decoration: InputDecoration(hintText: "Alias",)),
-                const TextField(decoration: InputDecoration(hintText: "URL",)),
-                const TextField(decoration: InputDecoration(hintText: "Username",)),
-                const TextField(decoration: InputDecoration(hintText: "Password",)),
-                //Tag section
-                Row(
-                  children:  [
-                    TagContainer(title: "Shopping", selectedTags: selectedTags, isSelected: false),
-                    TagContainer(title: "Social Media", selectedTags: selectedTags, isSelected: false),
-                    TagContainer(title: "Other", selectedTags: selectedTags, isSelected: false),
-                    TagContainer(title: "Porn", selectedTags: selectedTags, isSelected: false)
-                  ],
-                )
-
-
-              ],
+                  ElevatedButton(onPressed: ()=> setState(() {
+                    addItemToStore(s3);
+                  }), child: Text("add test entry"))
+                  //Listview.builder
+    
+                ],
+              ),
+            )
+          ),
+          //right section
+          //here we can view our passwords or create a new entry
+          Expanded(
+            flex: 1,
+            child: Container(
+              child: Column(
+                children:  <Widget>[
+                  TextField(controller:aliasController, decoration: const InputDecoration(hintText: "Alias",)),
+                  TextField(controller: urlController, decoration: const InputDecoration(hintText: "URL",)),
+                  TextField(controller: usernameController, decoration: const InputDecoration(hintText: "Username",)),
+                  TextField(controller: passwordController, decoration: const InputDecoration(hintText: "Password",)),
+                  //Tag section
+                  Row(
+                    children: allTags,
+                  )
+    
+    
+                ],
+              )
             )
           )
-        )
-      ],
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: ()async{
+          String alias = aliasController.text;
+          String url = urlController.text;
+          String username = usernameController.text;
+          String password = passwordController.text;
+
+          StoreItem newItem = StoreItem(alias, url, username, password, selectedTags);
+          await addItemToStore(newItem);
+          setState(() {
+            selectedTags = [];            
+          });
+        },
+        tooltip: 'add new entry',
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
@@ -145,11 +172,15 @@ class TagContainer extends StatefulWidget {
     Key? key,
   }) : super(key: key);
 
+  
   @override
   State<TagContainer> createState() => _TagContainerState();
 }
 
 class _TagContainerState extends State<TagContainer> {
+
+
+ 
   @override
   Widget build(BuildContext context) {
 
@@ -158,7 +189,6 @@ class _TagContainerState extends State<TagContainer> {
         if(widget.isSelected){
           widget.isSelected = false;
           widget.selectedTags.add(widget.title);
-          debugPrint(widget.selectedTags.length.toString());
         }else{
           widget.isSelected = true;
           widget.selectedTags.remove(widget.title);
@@ -177,7 +207,12 @@ class _TagContainerState extends State<TagContainer> {
       ),
     );
   }
+  
+  setSelectedToDefault()=>{
+    widget.isSelected = false
+  };
 }
+
 
 
 
