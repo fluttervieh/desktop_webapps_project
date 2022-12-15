@@ -63,7 +63,6 @@ class _MainScreenState extends State<MainScreen> {
     all.forEach((key, value) {
       //parse JSON
       //StoreItem item = StoreItem.fromJson(value);
-      debugPrint(value);
       StoreItem item = StoreItem.fromJson(jsonDecode(value));
       fetchedStoreItems.add(item);
     });
@@ -75,7 +74,6 @@ class _MainScreenState extends State<MainScreen> {
   Future<void>addItemToStore(StoreItem item)async{
     const uuid = Uuid();
     String json = jsonEncode(item);
-    debugPrint(json);
     await storage.write(key: uuid.v4(), value: json);
   }
 
@@ -111,11 +109,24 @@ class _MainScreenState extends State<MainScreen> {
                             shrinkWrap: true,        
                             itemCount: snapshot.data.length,
                             itemBuilder: (BuildContext context, int index){
-                              return ListTile(
-                                title: Text(snapshot.data[index].url),
-                                subtitle: Text(snapshot.data[index].username),
-                                tileColor: Colors.white,
-                                hoverColor: Colors.grey,
+                              bool isSelected = false;
+                              return GestureDetector(
+                                onTap: (){
+                                  setState(() {
+                                    if(isSelected){
+                                      isSelected = false;
+                                    }else{
+                                      isSelected = true;
+                                    }
+                                  });
+                                },
+                                child: ListTile(
+                                  title: Text(snapshot.data[index].url),
+                                  subtitle: Text(snapshot.data[index].username),
+                                  tileColor: Colors.white,
+                                  hoverColor: Colors.grey,
+                                  trailing: isSelected? Icon(Icons.visibility_off): Icon(Icons.visibility),
+                                ),
                               );
                             }
                           );
@@ -182,8 +193,6 @@ class _MainScreenState extends State<MainScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: ()async{
           if(validateInputs()){
-            debugPrint("hier komm ich rein");
-            debugPrint(selectedTags.toString());
             String alias = aliasController.text;
             String url = urlController.text;
             String username = usernameController.text;
@@ -254,7 +263,6 @@ class _TagContainerState extends State<TagContainer> {
       onTap: () => setState(() {
         if(widget.isSelected){
           widget.isSelected = false;
-          debugPrint(widget.selectedTags.toString());
           widget.selectedTags.remove(widget.title);
 
         }else{
