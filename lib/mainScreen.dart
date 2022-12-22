@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:desktop_webapp/ModelClasses/StoreItem.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -77,6 +76,13 @@ class _MainScreenState extends State<MainScreen> {
     await storage.write(key: uuid.v4(), value: json);
   }
 
+  Set activeListItems = {};
+
+  void setActive(index){
+    setState(() {
+      activeListItems.contains(index) ? activeListItems.remove(index) : activeListItems.add(index);
+    });
+  }
   @override
   Widget build(BuildContext context) {
 
@@ -109,23 +115,42 @@ class _MainScreenState extends State<MainScreen> {
                             shrinkWrap: true,        
                             itemCount: snapshot.data.length,
                             itemBuilder: (BuildContext context, int index){
-                              bool isSelected = false;
                               return GestureDetector(
                                 onTap: (){
-                                  setState(() {
-                                    if(isSelected){
-                                      isSelected = false;
-                                    }else{
-                                      isSelected = true;
-                                    }
-                                  });
+                                  setActive(index);
                                 },
-                                child: ListTile(
-                                  title: Text(snapshot.data[index].url),
-                                  subtitle: Text(snapshot.data[index].username),
-                                  tileColor: Colors.white,
-                                  hoverColor: Colors.grey,
-                                  trailing: isSelected? Icon(Icons.visibility_off): Icon(Icons.visibility),
+                                child: Container(
+                                  color: Colors.white,
+                                  child: Column(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              flex: 9,
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(snapshot.data[index].identifier, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                                  Text(snapshot.data[index].url),
+                                                  Text("usermame: " + snapshot.data[index].username),
+                                                  activeListItems.contains(index)?  
+                                                    Text("password: " + snapshot.data[index].password):Container(height: 0),
+
+                                                ],
+                                              )
+                                            ),
+                                            Expanded(
+                                              flex: 1,
+                                              child: activeListItems.contains(index)? const Icon(Icons.visibility_off): const Icon(Icons.visibility),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                     
+                                    ],
+                                  ),
                                 ),
                               );
                             }
