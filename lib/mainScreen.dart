@@ -117,7 +117,36 @@ class _MainScreenState extends State<MainScreen> {
                             itemBuilder: (BuildContext context, int index){
                               return GestureDetector(
                                 onTap: (){
-                                  setActive(index);
+                                  if(activeListItems.contains(index)){
+                                    setActive(index);
+                                  }else{
+                                  showDialog(context: context, builder: (BuildContext context){
+                                    TextEditingController pwController = TextEditingController();
+                                    return Dialog(
+                                      child: SizedBox(
+                                        height: MediaQuery.of(context).size.height/3,
+                                        width: MediaQuery.of(context).size.width/4,
+                                        child: Column(
+                                          children: [
+                                            const Text("Enter your master password."),
+                                            TextField(controller: pwController),
+                                            ElevatedButton(onPressed: (){
+                                              String pwText = pwController.text;
+                                              if(pwText != "test"){
+                                                return;
+                                              }else{
+                                                setActive(index);
+                                                pwController.text = "";
+                                                Navigator.of(context).pop();
+                                              }
+                                            }, child: const Text("Submit"))
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  });
+                                  }
+                                  
                                 },
                                 child: Container(
                                   color: Colors.white,
@@ -174,7 +203,7 @@ class _MainScreenState extends State<MainScreen> {
             child: Container(
               child: Column(
                 children:  <Widget>[
-                 
+                  const Text("Neues Passwort hinzufügen"),
                   TextField(
                     controller:aliasController, 
                     decoration: InputDecoration(
@@ -223,15 +252,39 @@ class _MainScreenState extends State<MainScreen> {
             String username = usernameController.text;
             String password = passwordController.text;
             StoreItem newItem = StoreItem(alias, url, username, password, selectedTags);
-            await addItemToStore(newItem);
-
-            setState(() {
-              selectedTags = [];
-              aliasController.text = "";
-              usernameController.text = "";
-              urlController.text = "";
-              passwordController.text = "";            
-            });
+            showDialog(context: context, builder: (BuildContext context) {
+                                    TextEditingController pwController = TextEditingController();
+                                    return Dialog(
+                                      child: SizedBox(
+                                        height: MediaQuery.of(context).size.height/3,
+                                        width: MediaQuery.of(context).size.width/4,
+                                        child: Column(
+                                          children: [
+                                            const Text("Enter your master password."),
+                                            TextField(controller: pwController),
+                                            ElevatedButton(onPressed: (){
+                                              String pwText = pwController.text;
+                                              if(pwText != "test"){
+                                                return;
+                                              }else{
+                                                pwController.text = "";
+                                                Navigator.of(context).pop();
+                                                addItemToStore(newItem);
+                                                setState(() {
+                                                  selectedTags = [];
+                                                  aliasController.text = "";
+                                                  usernameController.text = "";
+                                                  urlController.text = "";
+                                                  passwordController.text = "";            
+                                                });
+                                              }
+                                            }, child: const Text("Submit"))
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  });
+            //await addItemToStore(newItem);
           }else{
             return;
           }
@@ -258,6 +311,36 @@ class _MainScreenState extends State<MainScreen> {
     }
     return true;
   }
+  
+  Widget openMasterPWDialog(BuildContext context, VoidCallback function){
+    
+    TextEditingController pwController = TextEditingController();
+    return Dialog(
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height/3,
+        width: MediaQuery.of(context).size.width/4,
+        child: Column(
+          children: [
+            const Text("Enter your master password."),
+            TextField(controller: pwController),
+            ElevatedButton(onPressed: (){
+              String pwText = pwController.text;
+              if(pwText != "test"){
+
+                return;
+              }else{
+                function();
+                pwController.text = "";
+                Navigator.of(context).pop();
+              }
+            }, child: const Text("Submit"))
+          ],
+        ),
+      ),
+    );
+}
+
+
 }
 
 class TagContainer extends StatefulWidget {
