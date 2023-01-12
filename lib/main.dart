@@ -1,7 +1,20 @@
 import 'package:desktop_webapp/mainScreen.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:wasm/wasm.dart';
 
 void main() {
+  // web assembly
+  var encdecryptPath = Platform.script.resolve('encrypt_decrypt_bg.wasm');
+  final data = File(encdecryptPath.path).readAsBytesSync();
+  final mod = WasmModule(data);
+  print(mod.describe());
+  final inst = mod.builder().build();
+  final wasEncryptPassword = inst.lookupFunction('encryptPassword');
+  final wasDecryptPassword = inst.lookupFunction('decryptPassword');
+  print(wasEncryptPassword("key", "password"));
+  print(wasDecryptPassword("key", "password"));
+
   runApp(const MyApp());
 }
 
@@ -71,11 +84,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return const Scaffold(
-      
       body: MainScreen(),
-      
-       // This trailing comma makes auto-formatting nicer for build methods.
+
+      // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
-

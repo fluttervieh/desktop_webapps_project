@@ -26,16 +26,16 @@ samples, guidance on mobile development, and a full API reference.
 ## TODOs
 - [ ] passwort verschlüsseln in webasambly
 - [ ] beispiel für platformspezifische designanpassungen 
-- [ ] jeder eintrag sollte folgende felder haben
-    - [ ] titel
-    - [ ] username
-    - [ ] password
-    - [ ] url
-- [ ] alle credentials sollten aufgelistet werden können
-- [ ] eintrag hinzufügen
+- [x] jeder eintrag sollte folgende felder haben
+    - [x] titel
+    - [x] username
+    - [x] password
+    - [x] url
+- [x] alle credentials sollten aufgelistet werden können
+- [x] eintrag hinzufügen
 - [ ] eintrag bearbeiten
 - [ ] eintrag löschen
-- [ ] tags zu einträgen hinzufügen
+- [x] tags zu einträgen hinzufügen
 - [ ] liste filtern
     - [ ] über tags
     - [ ] über titel
