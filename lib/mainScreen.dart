@@ -3,7 +3,10 @@ import 'package:desktop_webapp/ModelClasses/StoreItem.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:io' show Platform;
 
+
+final storage = FlutterSecureStorage();
 
 class MainScreen extends StatefulWidget {
   const MainScreen({ Key? key }) : super(key: key);
@@ -22,6 +25,7 @@ class _MainScreenState extends State<MainScreen> {
   TextEditingController passwordController = TextEditingController();
 
   String? get _aliasErrorText {
+
     final aliasText = aliasController.text;
     if(aliasText.isEmpty || aliasText == ""){
       return 'Can\'t be empty';
@@ -55,25 +59,26 @@ class _MainScreenState extends State<MainScreen> {
 
   var _text = '';
 
-  Future<List<StoreItem>> getAllFromStorage()async{
-    List<StoreItem> fetchedStoreItems = [];
-    final all = await storage.readAll();
-
-    all.forEach((key, value) {
-      //parse JSON
-      //StoreItem item = StoreItem.fromJson(value);
-      StoreItem item = StoreItem.fromJson(jsonDecode(value));
-      fetchedStoreItems.add(item);
-    });
-
-    return fetchedStoreItems;
-  }
+  
 
   //parses json
   Future<void>addItemToStore(StoreItem item)async{
     const uuid = Uuid();
-    String json = jsonEncode(item);
-    await storage.write(key: uuid.v4(), value: json);
+    debugPrint("storing: " + item.toString());
+    var json = jsonEncode(item);
+    //var json = item.toJson(jsonEncode(item));
+    debugPrint("storing json item " + json.toString());
+
+    await storage.write(key: uuid.v4(), value: json.toString());
+  }
+
+  String parseStoreItemTags(List<String> tags){
+    String res = "[";
+    tags.forEach((tag) {
+      res += tag;
+    });
+    res += "]";
+    return res;
   }
 
   Set activeListItems = {};
@@ -89,10 +94,18 @@ class _MainScreenState extends State<MainScreen> {
  
     List<String> selectedTags = [];
     List<Widget> allTags = [];
-    allTags.add(TagContainer(title: "Shopping", selectedTags: selectedTags, isSelected: selectedTags.contains("Shopping")));
-    allTags.add(TagContainer(title: "Social Media", selectedTags: selectedTags, isSelected: selectedTags.contains("Social Media")));
-    allTags.add(TagContainer(title: "Other", selectedTags: selectedTags, isSelected: selectedTags.contains("Other")));
-    allTags.add(TagContainer(title: "Porn", selectedTags: selectedTags, isSelected: selectedTags.contains("Porn")));
+    allTags.add(TagContainer(title: "Shopping", selectedTags: selectedTags, isSelected: selectedTags.contains("Shopping"), isFilterItem: false,));
+    allTags.add(TagContainer(title: "Social Media", selectedTags: selectedTags, isSelected: selectedTags.contains("Social Media"), isFilterItem: false));
+    allTags.add(TagContainer(title: "Other", selectedTags: selectedTags, isSelected: selectedTags.contains("Other"), isFilterItem: false));
+    allTags.add(TagContainer(title: "Porn", selectedTags: selectedTags, isSelected: selectedTags.contains("Porn"), isFilterItem: false));
+
+    List<String> selectedFilterTags = [];
+    List<Widget> filterTags = [];
+    filterTags.add(TagContainer(title: "Shopping", selectedTags: selectedFilterTags, isSelected: selectedFilterTags.contains("Shopping"), isFilterItem: true));
+    filterTags.add(TagContainer(title: "Social Media", selectedTags: selectedFilterTags, isSelected: selectedFilterTags.contains("Social Media"),  isFilterItem: true));
+    filterTags.add(TagContainer(title: "Other", selectedTags: selectedFilterTags, isSelected: selectedFilterTags.contains("Other"),  isFilterItem: true));
+    filterTags.add(TagContainer(title: "Porn", selectedTags: selectedFilterTags, isSelected: selectedFilterTags.contains("Porn"), isFilterItem: true));
+
   
     return Scaffold(
       body: Row(
@@ -106,9 +119,13 @@ class _MainScreenState extends State<MainScreen> {
                 children: <Widget>[
                   //searchbar
                   const TextField(),
+                  Row(
+                    children: 
+                      filterTags,
+                  ),
                   Expanded(
                     child: FutureBuilder(
-                      future: getAllFromStorage(),
+                      future: getAllFromStorage(selectedFilterTags),
                       builder: ((BuildContext context, AsyncSnapshot snapshot) {
                         if(snapshot.hasData){
                           return ListView.builder(
@@ -296,6 +313,10 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
+  void getListFiteredbyTags(List<String> selectedFilterTags){
+
+  }
+
   bool validateInputs(){
     if(_aliasErrorText != null){
       return false;
@@ -347,10 +368,12 @@ class TagContainer extends StatefulWidget {
   final String title;
   final List<String> selectedTags;
   bool isSelected;
+  bool isFilterItem;
   TagContainer({
     required this.title,
     required this.selectedTags,
     required this.isSelected,
+    required this.isFilterItem,
 
     Key? key,
   }) : super(key: key);
@@ -373,9 +396,21 @@ class _TagContainerState extends State<TagContainer> {
           widget.isSelected = false;
           widget.selectedTags.remove(widget.title);
 
+          if(widget.isFilterItem){
+            setState(() {
+              getAllFromStorage(widget.selectedTags);
+            });
+          }
+          
+
         }else{
           widget.isSelected = true;
           widget.selectedTags.add(widget.title);
+          if(widget.isFilterItem){
+            setState(() {
+              getAllFromStorage(widget.selectedTags);
+            });
+          }
 
         }
       }),
@@ -393,6 +428,52 @@ class _TagContainerState extends State<TagContainer> {
     );
   }
 }
+
+
+
+
+
+Future<List<StoreItem>> getAllFromStorage(List<String>selectedFilterTags)async{
+    
+    List<StoreItem> fetchedStoreItems = [];
+    //await storage.deleteAll();
+   final all = await storage.readAll();
+    debugPrint("store fetch "  + all.toString());
+
+  //hier den String in ne liste parsen
+    all.forEach((key, value) {
+      //parse JSON
+      //StoreItem item = StoreItem.fromJson(value);
+      debugPrint(value);
+
+      //var a = jsonDecode(value);
+      //debugPrint(a.toString());
+
+      var a = jsonDecode(value);
+      StoreItem item = StoreItem.fromJson(jsonDecode(value));
+     
+      debugPrint(item.tags.length.toString());
+
+      if(item.tags.contains("Media")){
+        debugPrint("HELL YEAHHHHHH");
+      }
+
+      //   for (var selectedFilter in selectedFilterTags) {
+      //         debugPrint(selectedFilter);
+              
+      //       if(item.tags.contains(selectedFilter)){
+
+      //         //fetchedStoreItems.add(item);
+              
+      //       }
+      //   }
+      //   debugPrint(fetchedStoreItems.length.toString());
+      
+
+    });
+
+    return fetchedStoreItems;
+  }
 
 
 
