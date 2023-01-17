@@ -7,6 +7,8 @@ import 'dart:io' show Platform;
 
 
 final storage = FlutterSecureStorage();
+List<String> selectedFilterTags = [];
+
 
 class MainScreen extends StatefulWidget {
   const MainScreen({ Key? key }) : super(key: key);
@@ -17,7 +19,8 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
 
-  final storage = FlutterSecureStorage();
+  //final storage = FlutterSecureStorage();
+
 
   TextEditingController aliasController = TextEditingController();
   TextEditingController urlController = TextEditingController();
@@ -59,28 +62,6 @@ class _MainScreenState extends State<MainScreen> {
 
   var _text = '';
 
-  
-
-  //parses json
-  Future<void>addItemToStore(StoreItem item)async{
-    const uuid = Uuid();
-    debugPrint("storing: " + item.toString());
-    var json = jsonEncode(item);
-    //var json = item.toJson(jsonEncode(item));
-    debugPrint("storing json item " + json.toString());
-
-    await storage.write(key: uuid.v4(), value: json.toString());
-  }
-
-  String parseStoreItemTags(List<String> tags){
-    String res = "[";
-    tags.forEach((tag) {
-      res += tag;
-    });
-    res += "]";
-    return res;
-  }
-
   Set activeListItems = {};
 
   void setActive(index){
@@ -91,20 +72,27 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
 
+     void updateParentState(){
+      setState(() {
+        debugPrint("calledddd");
+
+      });
+    }
  
     List<String> selectedTags = [];
     List<Widget> allTags = [];
-    allTags.add(TagContainer(title: "Shopping", selectedTags: selectedTags, isSelected: selectedTags.contains("Shopping"), isFilterItem: false,));
-    allTags.add(TagContainer(title: "Social Media", selectedTags: selectedTags, isSelected: selectedTags.contains("Social Media"), isFilterItem: false));
-    allTags.add(TagContainer(title: "Other", selectedTags: selectedTags, isSelected: selectedTags.contains("Other"), isFilterItem: false));
-    allTags.add(TagContainer(title: "Porn", selectedTags: selectedTags, isSelected: selectedTags.contains("Porn"), isFilterItem: false));
+    allTags.add(TagContainer(title: "Shopping", selectedTags: selectedTags, isSelected: selectedTags.contains("Shopping"), isFilterItem: false ,updateParentState: () => updateParentState()));
+    allTags.add(TagContainer(title: "Social Media", selectedTags: selectedTags, isSelected: selectedTags.contains("Social Media"), isFilterItem: false, updateParentState: () => updateParentState()));
+    allTags.add(TagContainer(title: "Other", selectedTags: selectedTags, isSelected: selectedTags.contains("Other"), isFilterItem: false, updateParentState: () => updateParentState()));
+    allTags.add(TagContainer(title: "Porn", selectedTags: selectedTags, isSelected: selectedTags.contains("Porn"), isFilterItem: false, updateParentState: () => updateParentState()));
 
-    List<String> selectedFilterTags = [];
     List<Widget> filterTags = [];
-    filterTags.add(TagContainer(title: "Shopping", selectedTags: selectedFilterTags, isSelected: selectedFilterTags.contains("Shopping"), isFilterItem: true));
-    filterTags.add(TagContainer(title: "Social Media", selectedTags: selectedFilterTags, isSelected: selectedFilterTags.contains("Social Media"),  isFilterItem: true));
-    filterTags.add(TagContainer(title: "Other", selectedTags: selectedFilterTags, isSelected: selectedFilterTags.contains("Other"),  isFilterItem: true));
-    filterTags.add(TagContainer(title: "Porn", selectedTags: selectedFilterTags, isSelected: selectedFilterTags.contains("Porn"), isFilterItem: true));
+    filterTags.add(TagContainer(title: "Shopping", selectedTags: selectedFilterTags, isSelected: selectedFilterTags.contains("Shopping"), isFilterItem: true, updateParentState: () => updateParentState()));
+    filterTags.add(TagContainer(title: "Social Media", selectedTags: selectedFilterTags, isSelected: selectedFilterTags.contains("Social Media"),  isFilterItem: true, updateParentState: () => updateParentState()));
+    filterTags.add(TagContainer(title: "Other", selectedTags: selectedFilterTags, isSelected: selectedFilterTags.contains("Other"),  isFilterItem: true, updateParentState: () => updateParentState()));
+    filterTags.add(TagContainer(title: "Porn", selectedTags: selectedFilterTags, isSelected: selectedFilterTags.contains("Porn"), isFilterItem: true, updateParentState: () => updateParentState()));
+
+   
 
   
     return Scaffold(
@@ -128,6 +116,7 @@ class _MainScreenState extends State<MainScreen> {
                       future: getAllFromStorage(selectedFilterTags),
                       builder: ((BuildContext context, AsyncSnapshot snapshot) {
                         if(snapshot.hasData){
+                          debugPrint("dataaaaa: " + snapshot.data.length.toString());
                           return ListView.builder(
                             shrinkWrap: true,        
                             itemCount: snapshot.data.length,
@@ -369,12 +358,13 @@ class TagContainer extends StatefulWidget {
   final List<String> selectedTags;
   bool isSelected;
   bool isFilterItem;
+  Function updateParentState;
   TagContainer({
     required this.title,
     required this.selectedTags,
     required this.isSelected,
     required this.isFilterItem,
-
+    required this.updateParentState,
     Key? key,
   }) : super(key: key);
 
@@ -397,9 +387,8 @@ class _TagContainerState extends State<TagContainer> {
           widget.selectedTags.remove(widget.title);
 
           if(widget.isFilterItem){
-            setState(() {
-              getAllFromStorage(widget.selectedTags);
-            });
+              selectedFilterTags.remove(widget.title);
+              widget.updateParentState();
           }
           
 
@@ -407,9 +396,8 @@ class _TagContainerState extends State<TagContainer> {
           widget.isSelected = true;
           widget.selectedTags.add(widget.title);
           if(widget.isFilterItem){
-            setState(() {
-              getAllFromStorage(widget.selectedTags);
-            });
+              selectedFilterTags.add(widget.title);
+              widget.updateParentState();
           }
 
         }
@@ -431,45 +419,34 @@ class _TagContainerState extends State<TagContainer> {
 
 
 
+Future<void>addItemToStore(StoreItem item)async{
+    const uuid = Uuid();
+    var json = jsonEncode(item);
+    await storage.write(key: uuid.v4(), value: json.toString());
+}
 
 
 Future<List<StoreItem>> getAllFromStorage(List<String>selectedFilterTags)async{
     
-    List<StoreItem> fetchedStoreItems = [];
+   List<StoreItem> fetchedStoreItems = [];
     //await storage.deleteAll();
    final all = await storage.readAll();
     debugPrint("store fetch "  + all.toString());
 
-  //hier den String in ne liste parsen
     all.forEach((key, value) {
-      //parse JSON
-      //StoreItem item = StoreItem.fromJson(value);
-      debugPrint(value);
 
-      //var a = jsonDecode(value);
-      //debugPrint(a.toString());
-
-      var a = jsonDecode(value);
       StoreItem item = StoreItem.fromJson(jsonDecode(value));
-     
-      debugPrint(item.tags.length.toString());
 
-      if(item.tags.contains("Media")){
-        debugPrint("HELL YEAHHHHHH");
+      if(selectedFilterTags.isEmpty){
+        fetchedStoreItems.add(item);
+      }else{
+        fetchedStoreItems = [];
+        for (var selectedFilter in selectedFilterTags) {
+            if(item.tags.contains(selectedFilter) && !fetchedStoreItems.contains(item)){
+              fetchedStoreItems.add(item); 
+            }
+        }
       }
-
-      //   for (var selectedFilter in selectedFilterTags) {
-      //         debugPrint(selectedFilter);
-              
-      //       if(item.tags.contains(selectedFilter)){
-
-      //         //fetchedStoreItems.add(item);
-              
-      //       }
-      //   }
-      //   debugPrint(fetchedStoreItems.length.toString());
-      
-
     });
 
     return fetchedStoreItems;
