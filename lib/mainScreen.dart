@@ -163,7 +163,7 @@ class _MainScreenState extends State<MainScreen> {
                                         child: Row(
                                           children: [
                                             Expanded(
-                                              flex: 9,
+                                              flex: 8,
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
@@ -178,8 +178,21 @@ class _MainScreenState extends State<MainScreen> {
                                             ),
                                             Expanded(
                                               flex: 1,
+                                              child: IconButton(
+                                                icon: const Icon(Icons.delete),
+                                                onPressed: (){
+                                                  setState (() {
+                                                    debugPrint("item deleted");
+                                                    storage.delete(key: snapshot.data[index].uid);
+                                                  });
+                                                },
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 1,
                                               child: activeListItems.contains(index)? const Icon(Icons.visibility_off): const Icon(Icons.visibility),
                                             ),
+                                            
                                           ],
                                         ),
                                       )
@@ -253,11 +266,13 @@ class _MainScreenState extends State<MainScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: ()async{
           if(validateInputs()){
+            const uuid = Uuid();
             String alias = aliasController.text;
             String url = urlController.text;
             String username = usernameController.text;
             String password = passwordController.text;
-            StoreItem newItem = StoreItem(alias, url, username, password, selectedTags);
+
+            StoreItem newItem = StoreItem(uuid.v4(), alias, url, username, password, selectedTags);
             showDialog(context: context, builder: (BuildContext context) {
                                     TextEditingController pwController = TextEditingController();
                                     return Dialog(
@@ -302,9 +317,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  void getListFiteredbyTags(List<String> selectedFilterTags){
-
-  }
+  
 
   bool validateInputs(){
     if(_aliasErrorText != null){
@@ -420,9 +433,8 @@ class _TagContainerState extends State<TagContainer> {
 
 
 Future<void>addItemToStore(StoreItem item)async{
-    const uuid = Uuid();
     var json = jsonEncode(item);
-    await storage.write(key: uuid.v4(), value: json.toString());
+    await storage.write(key: item.uid, value: json.toString());
 }
 
 
@@ -448,6 +460,10 @@ Future<List<StoreItem>> getAllFromStorage(List<String>selectedFilterTags)async{
         }
       }
     });
+
+    void deleteItem(String itemUID)async{
+      await storage.delete(key: itemUID);
+    }
 
     return fetchedStoreItems;
   }
