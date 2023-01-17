@@ -35,10 +35,7 @@ class StoreItem{
     'password': password.toString(),
     'tags' : tags,
   };
-  // factory StoreItem.fromJson(Map<String, dynamic> json) => _$StoreItemFromJson(json);
-
-  // /// Connect the generated [_$StoreItemToJson] function to the `toJson` method.
-  // Map<String, dynamic> toJson() => _$StoreItemToJson(this);
+ 
   
 
 }
