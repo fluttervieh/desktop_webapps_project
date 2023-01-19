@@ -42,12 +42,16 @@ samples, guidance on mobile development, and a full API reference.
 - [ ] passwort verschlüsselt speichern
     - [ ] idealerweise mit anderer programmiersprache (webasembly)
     - [ ] entschlüsseln beim lesen (mit masterpasswort?)
-- [ ] Testing
-    - [ ] UI Tests
-    - [ ] Unit Tests
+- [x] Testing
+    - [x] Unit Tests
+    - [x] UI Tests
 - [ ] Readme.md mit how to start the application
 
 
 # How to start the application
 
 TODO
+
+## Path to special folder :P
+
+/Users/stefanbeller/Library/Containers/at.fhv.desktopapplications.pwmanager/Data
