@@ -24,7 +24,6 @@ samples, guidance on mobile development, and a full API reference.
 - persistente speicherung von credentials
 
 ## TODOs
-- [ ] passwort verschlüsseln in webasambly
 - [ ] beispiel für platformspezifische designanpassungen 
 - [ ] jeder eintrag sollte folgende felder haben
     - [ ] titel
@@ -51,7 +50,3 @@ samples, guidance on mobile development, and a full API reference.
 # How to start the application
 
 TODO
-
-## Path to special folder :P
-
-/Users/stefanbeller/Library/Containers/at.fhv.desktopapplications.pwmanager/Data
