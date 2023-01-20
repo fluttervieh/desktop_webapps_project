@@ -461,7 +461,7 @@ Future<List<StoreItem>> getAllFromStorage(List<String>selectedFilterTags)async{
         fetchedStoreItems.add(item);
       }else if(searchCredential != ""){
         debugPrint("hier komi nei");
-        if(item.identifier.contains(searchCredential) && !fetchedStoreItems.contains(item)){
+        if((item.identifier.contains(searchCredential)||item.url.contains(searchCredential)) && !fetchedStoreItems.contains(item)){
           fetchedStoreItems.add(item);
         }
       }else{
