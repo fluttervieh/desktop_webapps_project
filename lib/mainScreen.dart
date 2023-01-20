@@ -8,7 +8,7 @@ import 'dart:io' show Platform;
 
 final storage = FlutterSecureStorage();
 List<String> selectedFilterTags = [];
-
+String searchCredential = "";
 
 class MainScreen extends StatefulWidget {
   const MainScreen({ Key? key }) : super(key: key);
@@ -26,6 +26,8 @@ class _MainScreenState extends State<MainScreen> {
   TextEditingController urlController = TextEditingController();
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+
+  TextEditingController searchCredentialController = TextEditingController();
 
   String? get _aliasErrorText {
 
@@ -69,13 +71,13 @@ class _MainScreenState extends State<MainScreen> {
       activeListItems.contains(index) ? activeListItems.remove(index) : activeListItems.add(index);
     });
   }
+
   @override
   Widget build(BuildContext context) {
 
      void updateParentState(){
       setState(() {
-        debugPrint("calledddd");
-
+        debugPrint("updated State");
       });
     }
  
@@ -93,20 +95,27 @@ class _MainScreenState extends State<MainScreen> {
     filterTags.add(TagContainer(title: "Porn", selectedTags: selectedFilterTags, isSelected: selectedFilterTags.contains("Porn"), isFilterItem: true, updateParentState: () => updateParentState()));
 
    
-
-  
     return Scaffold(
       body: Row(
         children:<Widget> [
           //left section of the key manager
           //in future, we have to wrap this on in a future builder to get the async stuff
           Expanded(
-            flex: 1,
             child: Container(
               child: Column(
                 children: <Widget>[
                   //searchbar
-                  const TextField(),
+                  Row(
+                    children: <Widget>[
+                      Expanded( flex: 9, child: TextField(controller: searchCredentialController,)),
+                      IconButton(onPressed: (() {
+                        debugPrint(searchCredentialController.text);
+                        searchCredential = searchCredentialController.text;
+                        debugPrint("pressss");
+                        updateParentState();
+                      }), icon: const Icon(Icons.search))
+                    ],
+                  ),
                   Row(
                     children: 
                       filterTags,
@@ -116,7 +125,6 @@ class _MainScreenState extends State<MainScreen> {
                       future: getAllFromStorage(selectedFilterTags),
                       builder: ((BuildContext context, AsyncSnapshot snapshot) {
                         if(snapshot.hasData){
-                          debugPrint("dataaaaa: " + snapshot.data.length.toString());
                           return ListView.builder(
                             shrinkWrap: true,        
                             itemCount: snapshot.data.length,
@@ -437,7 +445,7 @@ Future<void>addItemToStore(StoreItem item)async{
     await storage.write(key: item.uid, value: json.toString());
 }
 
-
+//Diese funktion ist sehr schrecklich geschrieben, tut mir leid :-(
 Future<List<StoreItem>> getAllFromStorage(List<String>selectedFilterTags)async{
     
    List<StoreItem> fetchedStoreItems = [];
@@ -449,10 +457,15 @@ Future<List<StoreItem>> getAllFromStorage(List<String>selectedFilterTags)async{
 
       StoreItem item = StoreItem.fromJson(jsonDecode(value));
 
-      if(selectedFilterTags.isEmpty){
+      if(selectedFilterTags.isEmpty && (searchCredential == "" || searchCredential.isEmpty)){
         fetchedStoreItems.add(item);
+      }else if(searchCredential != ""){
+        debugPrint("hier komi nei");
+        if(item.identifier.contains(searchCredential) && !fetchedStoreItems.contains(item)){
+          fetchedStoreItems.add(item);
+        }
       }else{
-        fetchedStoreItems = [];
+        //fetchedStoreItems = [];
         for (var selectedFilter in selectedFilterTags) {
             if(item.tags.contains(selectedFilter) && !fetchedStoreItems.contains(item)){
               fetchedStoreItems.add(item); 
@@ -461,12 +474,10 @@ Future<List<StoreItem>> getAllFromStorage(List<String>selectedFilterTags)async{
       }
     });
 
-    void deleteItem(String itemUID)async{
-      await storage.delete(key: itemUID);
-    }
-
     return fetchedStoreItems;
   }
+
+  
 
 
 
