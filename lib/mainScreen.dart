@@ -171,7 +171,7 @@ class _MainScreenState extends State<MainScreen> {
                                         child: Row(
                                           children: [
                                             Expanded(
-                                              flex: 8,
+                                              flex: 7,
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
@@ -183,6 +183,19 @@ class _MainScreenState extends State<MainScreen> {
 
                                                 ],
                                               )
+                                            ),
+                                            Expanded(
+                                              flex: 1,
+                                              child:  IconButton(
+                                                icon: const Icon(Icons.edit),
+                                                onPressed: (){
+                                                  //alert fenster
+                                                  //editen
+                                                  showDialog(context: context, builder: (BuildContext context){
+                                                    return  EditPasswordDialog(item: snapshot.data[index]);
+                                                  });
+                                                },
+                                              ),
                                             ),
                                             Expanded(
                                               flex: 1,
@@ -374,6 +387,51 @@ class _MainScreenState extends State<MainScreen> {
 
 }
 
+class EditPasswordDialog extends StatelessWidget {
+  const EditPasswordDialog({
+    Key? key,
+    required this.item,
+  }) : super(key: key);
+  final StoreItem item;
+  //final List<String> selectedTags;
+
+  @override
+  Widget build(BuildContext context) {
+    TextEditingController aliasController = TextEditingController();
+    TextEditingController urlController = TextEditingController();
+    TextEditingController usernameController = TextEditingController();
+    TextEditingController passwordController = TextEditingController();
+
+    return Dialog(
+      child: Column(
+        children: [
+          TextField(),
+          TextField(),
+          TextField(),
+          TextField(),
+          Row(
+            children: [
+              // TextField(),
+              // TextField(),
+              // TextField(),
+              TagContainer(title: "Shopping", selectedTags: item.tags, isSelected: item.tags.contains("Shopping"), isFilterItem: false ,updateParentState: () => (){}),
+              TagContainer(title: "Social Media", selectedTags: item.tags, isSelected: item.tags.contains("Social Media"), isFilterItem: false ,updateParentState: () => (){}),
+              TagContainer(title: "Other", selectedTags: item.tags, isSelected: item.tags.contains("Other"), isFilterItem: false ,updateParentState: () => (){}),
+              TagContainer(title: "Porn", selectedTags: item.tags, isSelected: item.tags.contains("Porn"), isFilterItem: false ,updateParentState: () => (){}),
+            ],
+          ),
+          Row(
+            children: [
+              ElevatedButton(onPressed:() =>  Navigator.of(context).pop(), child: const Text("cancel")),
+              ElevatedButton(onPressed:() =>  (){}, child: const Text("save"))
+            ],
+          )
+        ],
+      )
+    );
+  }
+}
+
 class TagContainer extends StatefulWidget {
   final String title;
   final List<String> selectedTags;
@@ -473,7 +531,6 @@ Future<List<StoreItem>> getAllFromStorage(List<String>selectedFilterTags)async{
         }
       }
     });
-
     return fetchedStoreItems;
   }
 
