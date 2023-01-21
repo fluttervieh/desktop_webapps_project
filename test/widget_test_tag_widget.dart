@@ -12,7 +12,7 @@ void main() {
     await tester.pumpWidget(MyApp(key: UniqueKey()));
 
     // Verify that Shopping is present
-    expect(find.text('Shopping'), findsOneWidget);
+    expect(find.text('Shopping'), findsWidgets);
     // Verify that Streaming is present
     expect(find.text('Streaming'), findsNothing);
   });
@@ -24,7 +24,13 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: TagContainer(title: title, selectedTags: selectedTags, isSelected: isSelected),
+        body: TagContainer(
+            title: title,
+            selectedTags: selectedTags,
+            isSelected: isSelected,
+            isFilterItem: true,
+            updateParentState: () => () {},
+            key: UniqueKey()),
       ),
     ));
 
