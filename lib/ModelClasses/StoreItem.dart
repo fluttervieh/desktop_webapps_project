@@ -11,6 +11,10 @@ class StoreItem {
 
   const StoreItem(this.uid, this.identifier, this.url, this.username, this.password, this.tags);
 
+  set password(String value) {
+    password = value;
+  }
+
   factory StoreItem.fromJson(Map<String, dynamic> json) {
     return StoreItem(
         json['uid'] as String,

@@ -1,4 +1,4 @@
-// Flutter widget test.
+// Flutter widget test. (UI Test)
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

@@ -26,7 +26,7 @@ samples, guidance on mobile development, and a full API reference.
 - [x] eintrag hinzufügen
 - [ ] eintrag bearbeiten
 - [x] eintrag löschen
-- [ ] tags zu einträgen hinzufügen
+- [x] tags zu einträgen hinzufügen
 - [ ] liste filtern
     - [x] über tags
     - [ ] über titel

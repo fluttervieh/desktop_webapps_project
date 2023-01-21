@@ -3,6 +3,7 @@ import 'package:desktop_webapp/ModelClasses/StoreItem.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
+import 'package:desktop_webapp/encryptdecrypt.dart';
 import 'dart:io' show Platform;
 
 final storage = FlutterSecureStorage();
@@ -17,8 +18,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  //final storage = FlutterSecureStorage();
-
   TextEditingController aliasController = TextEditingController();
   TextEditingController urlController = TextEditingController();
   TextEditingController usernameController = TextEditingController();
@@ -77,6 +76,8 @@ class _MainScreenState extends State<MainScreen> {
         debugPrint("updated State");
       });
     }
+
+    // TODO list with titles and loop through
 
     List<String> selectedTags = [];
     List<Widget> allTags = [];
@@ -222,9 +223,14 @@ class _MainScreenState extends State<MainScreen> {
                                                     Text(snapshot.data[index].identifier,
                                                         style: const TextStyle(fontWeight: FontWeight.bold)),
                                                     Text(snapshot.data[index].url),
-                                                    Text("usermame: " + snapshot.data[index].username),
+                                                    Text("username: " + snapshot.data[index].username),
+
+                                                    // TODO use decrypt instead of decryptLocal
+                                                    // TODO use master password instead of test
                                                     activeListItems.contains(index)
-                                                        ? Text("password: " + snapshot.data[index].password)
+                                                        ? Text("password: " +
+                                                            (Encryptdecrypt.decryptLocal(
+                                                                "test", snapshot.data[index].password)))
                                                         : Container(height: 0),
                                                   ],
                                                 )),
@@ -238,7 +244,9 @@ class _MainScreenState extends State<MainScreen> {
                                                   showDialog(
                                                       context: context,
                                                       builder: (BuildContext context) {
-                                                        return EditPasswordDialog(item: snapshot.data[index]);
+                                                        return EditPasswordDialog(
+                                                            item: snapshot.data[index],
+                                                            updateParentState: () => updateParentState());
                                                       });
                                                 },
                                               ),
@@ -340,13 +348,14 @@ class _MainScreenState extends State<MainScreen> {
                           TextField(controller: pwController),
                           ElevatedButton(
                               onPressed: () {
+                                // TODO mabe check for master password
                                 String pwText = pwController.text;
                                 if (pwText != "test") {
                                   return;
                                 } else {
-                                  pwController.text = "";
                                   Navigator.of(context).pop();
-                                  addItemToStore(newItem);
+                                  addItemToStore(newItem, pwText);
+                                  pwController.text = "";
                                   setState(() {
                                     selectedTags = [];
                                     aliasController.text = "";
@@ -389,6 +398,7 @@ class _MainScreenState extends State<MainScreen> {
     return true;
   }
 
+// NOT USED TODO remove
   Widget openMasterPWDialog(BuildContext context, VoidCallback function) {
     TextEditingController pwController = TextEditingController();
     return Dialog(
@@ -422,9 +432,10 @@ class EditPasswordDialog extends StatelessWidget {
   const EditPasswordDialog({
     Key? key,
     required this.item,
+    required this.updateParentState,
   }) : super(key: key);
   final StoreItem item;
-  //final List<String> selectedTags;
+  final Function updateParentState;
 
   @override
   Widget build(BuildContext context) {
@@ -433,18 +444,38 @@ class EditPasswordDialog extends StatelessWidget {
     TextEditingController usernameController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
 
+    aliasController.text = item.identifier;
+    urlController.text = item.url;
+    usernameController.text = item.username;
+    passwordController.text = item.password;
+
+    FlutterSecureStorage storage = const FlutterSecureStorage();
+
+    void safeNewEntry() {
+      //TODO: some validation
+      String alias = aliasController.text;
+      String url = urlController.text;
+      String username = usernameController.text;
+      String password = passwordController.text;
+      List<String> tags = item.tags;
+
+      StoreItem updatedItem = StoreItem(item.uid, alias, url, username, password, tags);
+      var updatedItemJson = jsonEncode(updatedItem);
+      storage.write(key: item.uid, value: updatedItemJson.toString());
+
+      Navigator.pop(context);
+      updateParentState();
+    }
+
     return Dialog(
         child: Column(
       children: [
-        TextField(),
-        TextField(),
-        TextField(),
-        TextField(),
+        TextField(controller: aliasController),
+        TextField(controller: urlController),
+        TextField(controller: usernameController),
+        TextField(controller: passwordController),
         Row(
           children: [
-            // TextField(),
-            // TextField(),
-            // TextField(),
             TagContainer(
                 title: "Shopping",
                 selectedTags: item.tags,
@@ -474,7 +505,7 @@ class EditPasswordDialog extends StatelessWidget {
         Row(
           children: [
             ElevatedButton(onPressed: () => Navigator.of(context).pop(), child: const Text("cancel")),
-            ElevatedButton(onPressed: () => () {}, child: const Text("save"))
+            ElevatedButton(onPressed: () => safeNewEntry(), child: const Text("save"))
           ],
         )
       ],
@@ -535,7 +566,11 @@ class _TagContainerState extends State<TagContainer> {
   }
 }
 
-Future<void> addItemToStore(StoreItem item) async {
+Future<void> addItemToStore(StoreItem item, String masterPassword) async {
+  // encrypt the password with the master password
+
+  // TODO check encryption
+  // item.password = await Encryptdecrypt.encrypt(masterPassword, item.password);
   var json = jsonEncode(item);
   await storage.write(key: item.uid, value: json.toString());
 }
@@ -545,7 +580,6 @@ Future<List<StoreItem>> getAllFromStorage(List<String> selectedFilterTags) async
   List<StoreItem> fetchedStoreItems = [];
   //await storage.deleteAll();
   final all = await storage.readAll();
-  debugPrint("store fetch " + all.toString());
 
   all.forEach((key, value) {
     StoreItem item = StoreItem.fromJson(jsonDecode(value));

@@ -6,11 +6,6 @@ import 'package:desktop_webapp/encryptdecrypt.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-
-  test('Test enc dec', () {
-    Encryptdecrypt.test("Hello");
-  });
-
   test('Test encrypt - decrypt', () async {
     String pwd = "MyPassword";
 
