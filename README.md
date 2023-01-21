@@ -15,14 +15,6 @@ For help getting started with Flutter, view our
 [online documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
-
-
-# TOOD Anforderungen
-
-## Grundlegende Anforderungen
-- komplette offline funktionalität
-- persistente speicherung von credentials
-
 ## TODOs
 - [ ] passwort verschlüsseln in webasambly
 - [ ] beispiel für platformspezifische designanpassungen 
@@ -51,7 +43,9 @@ samples, guidance on mobile development, and a full API reference.
 # How to start the application
 
 TODO
+## Install Packages
 
-## Path to special folder :P
+run 
+    flutter pub get
 
-/Users/stefanbeller/Library/Containers/at.fhv.desktopapplications.pwmanager/Data
+to install all required packages

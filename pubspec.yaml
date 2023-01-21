@@ -37,6 +37,7 @@ dependencies:
   flutter_secure_storage: ^7.0.1
   uuid: ^3.0.7
   rncryptor: ^0.0.2
+  json_annotation: ^4.8.0
 
 dev_dependencies:
   flutter_test:
