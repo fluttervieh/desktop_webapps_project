@@ -192,7 +192,7 @@ class _MainScreenState extends State<MainScreen> {
                                                   //alert fenster
                                                   //editen
                                                   showDialog(context: context, builder: (BuildContext context){
-                                                    return  EditPasswordDialog(item: snapshot.data[index]);
+                                                    return  EditPasswordDialog(item: snapshot.data[index], updateParentState: ()=> updateParentState());
                                                   });
                                                 },
                                               ),
@@ -391,9 +391,10 @@ class EditPasswordDialog extends StatelessWidget {
   const EditPasswordDialog({
     Key? key,
     required this.item,
+    required this.updateParentState,
   }) : super(key: key);
   final StoreItem item;
-  //final List<String> selectedTags;
+  final Function updateParentState;
 
   @override
   Widget build(BuildContext context) {
@@ -402,18 +403,38 @@ class EditPasswordDialog extends StatelessWidget {
     TextEditingController usernameController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
 
+    aliasController.text = item.identifier;
+    urlController.text = item.url;
+    usernameController.text = item.username;
+    passwordController.text = item.password;
+
+    FlutterSecureStorage storage = const FlutterSecureStorage();
+
+    void safeNewEntry(){
+      //TODO: some validation
+      String alias = aliasController.text;
+      String url = urlController.text;
+      String username = usernameController.text;
+      String password = passwordController.text;
+      List<String> tags = item.tags;
+
+      StoreItem updatedItem = StoreItem(item.uid, alias, url, username, password, tags);
+      var updatedItemJson = jsonEncode(updatedItem);
+      storage.write(key: item.uid, value: updatedItemJson.toString());
+
+      Navigator.pop(context);
+      updateParentState();
+    }
+
     return Dialog(
       child: Column(
         children: [
-          TextField(),
-          TextField(),
-          TextField(),
-          TextField(),
+          TextField(controller: aliasController),
+          TextField(controller: urlController),
+          TextField(controller: usernameController),
+          TextField(controller: passwordController),
           Row(
             children: [
-              // TextField(),
-              // TextField(),
-              // TextField(),
               TagContainer(title: "Shopping", selectedTags: item.tags, isSelected: item.tags.contains("Shopping"), isFilterItem: false ,updateParentState: () => (){}),
               TagContainer(title: "Social Media", selectedTags: item.tags, isSelected: item.tags.contains("Social Media"), isFilterItem: false ,updateParentState: () => (){}),
               TagContainer(title: "Other", selectedTags: item.tags, isSelected: item.tags.contains("Other"), isFilterItem: false ,updateParentState: () => (){}),
@@ -423,7 +444,7 @@ class EditPasswordDialog extends StatelessWidget {
           Row(
             children: [
               ElevatedButton(onPressed:() =>  Navigator.of(context).pop(), child: const Text("cancel")),
-              ElevatedButton(onPressed:() =>  (){}, child: const Text("save"))
+              ElevatedButton(onPressed:() =>  safeNewEntry(), child: const Text("save"))
             ],
           )
         ],
@@ -469,8 +490,6 @@ class _TagContainerState extends State<TagContainer> {
               selectedFilterTags.remove(widget.title);
               widget.updateParentState();
           }
-          
-
         }else{
           widget.isSelected = true;
           widget.selectedTags.add(widget.title);
@@ -478,7 +497,6 @@ class _TagContainerState extends State<TagContainer> {
               selectedFilterTags.add(widget.title);
               widget.updateParentState();
           }
-
         }
       }),
       child: Container(
@@ -509,7 +527,6 @@ Future<List<StoreItem>> getAllFromStorage(List<String>selectedFilterTags)async{
    List<StoreItem> fetchedStoreItems = [];
     //await storage.deleteAll();
    final all = await storage.readAll();
-    debugPrint("store fetch "  + all.toString());
 
     all.forEach((key, value) {
 
