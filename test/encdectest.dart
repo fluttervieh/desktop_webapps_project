@@ -1,6 +1,7 @@
-// Import the test package and Counter class
-import 'package:flutter_test/flutter_test.dart';
+// This test tests the functionality to encrypt and decrypt passwords
 
+// Import the test package and encrypt decrypt class
+import 'package:flutter_test/flutter_test.dart';
 import 'package:desktop_webapp/encryptdecrypt.dart';
 
 void main() {

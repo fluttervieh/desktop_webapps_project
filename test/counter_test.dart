@@ -1,3 +1,5 @@
+// This is a simple Unit test to demonstrate how to use unit tests.
+
 // Import the test package and Counter class
 import 'package:desktop_webapp/exampleToTest/counter.dart';
 import 'package:flutter_test/flutter_test.dart';
