@@ -207,9 +207,9 @@ class _MainScreenState extends State<MainScreen> {
                                               child: IconButton(
                                                 icon: const Icon(Icons.delete),
                                                 onPressed: () {
-                                                  setState(() {
-                                                    debugPrint("item deleted");
-                                                    storage.delete(key: snapshot.data[index].uid);
+                                                  showDialog(context: context, builder: (BuildContext context){
+                                                      TextEditingController pwController = TextEditingController();
+                                                      return MasterPWDialog(pwController: pwController, onPasswordValidated: ()=> closeDialogifPasswordDeleted(pwController, snapshot.data[index].uid));
                                                   });
                                                 },
                                               ),
@@ -326,6 +326,12 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  void closeDialogifPasswordDeleted(TextEditingController masterPWController, String uid){
+    setState(() {
+      storage.delete(key: uid);
+      Navigator.pop(context);
+    });
+  }
 
   bool validateInputs() {
     if (_aliasErrorText != null) {
