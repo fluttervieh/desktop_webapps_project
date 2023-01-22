@@ -1,5 +1,6 @@
 // Flutter widget test. (UI Test)
 
+import 'package:desktop_webapp/widgets/TagContainer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -29,6 +30,7 @@ void main() {
             selectedTags: selectedTags,
             isSelected: isSelected,
             isFilterItem: true,
+            selectedFilterTags: selectedFilterTags,
             updateParentState: () => () {},
             key: UniqueKey()),
       ),

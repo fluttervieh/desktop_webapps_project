@@ -1,5 +1,8 @@
 import 'dart:convert';
 import 'package:desktop_webapp/ModelClasses/StoreItem.dart';
+import 'package:desktop_webapp/widgets/EditPasswordDialog.dart';
+import 'package:desktop_webapp/widgets/MasterPWDialog.dart';
+import 'package:desktop_webapp/widgets/TagContainer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
@@ -77,61 +80,32 @@ class _MainScreenState extends State<MainScreen> {
       });
     }
 
-    // TODO list with titles and loop through
 
+    List<String> tagNames = ["Shopping", "Social Media", "Other", "Porn"];
     List<String> selectedTags = [];
     List<Widget> allTags = [];
-    allTags.add(TagContainer(
-        title: "Shopping",
-        selectedTags: selectedTags,
-        isSelected: selectedTags.contains("Shopping"),
-        isFilterItem: false,
-        updateParentState: () => updateParentState()));
-    allTags.add(TagContainer(
-        title: "Social Media",
-        selectedTags: selectedTags,
-        isSelected: selectedTags.contains("Social Media"),
-        isFilterItem: false,
-        updateParentState: () => updateParentState()));
-    allTags.add(TagContainer(
-        title: "Other",
-        selectedTags: selectedTags,
-        isSelected: selectedTags.contains("Other"),
-        isFilterItem: false,
-        updateParentState: () => updateParentState()));
-    allTags.add(TagContainer(
-        title: "Porn",
-        selectedTags: selectedTags,
-        isSelected: selectedTags.contains("Porn"),
-        isFilterItem: false,
-        updateParentState: () => updateParentState()));
-
     List<Widget> filterTags = [];
-    filterTags.add(TagContainer(
-        title: "Shopping",
-        selectedTags: selectedFilterTags,
-        isSelected: selectedFilterTags.contains("Shopping"),
-        isFilterItem: true,
-        updateParentState: () => updateParentState()));
-    filterTags.add(TagContainer(
-        title: "Social Media",
-        selectedTags: selectedFilterTags,
-        isSelected: selectedFilterTags.contains("Social Media"),
-        isFilterItem: true,
-        updateParentState: () => updateParentState()));
-    filterTags.add(TagContainer(
-        title: "Other",
-        selectedTags: selectedFilterTags,
-        isSelected: selectedFilterTags.contains("Other"),
-        isFilterItem: true,
-        updateParentState: () => updateParentState()));
-    filterTags.add(TagContainer(
-        title: "Porn",
-        selectedTags: selectedFilterTags,
-        isSelected: selectedFilterTags.contains("Porn"),
-        isFilterItem: true,
-        updateParentState: () => updateParentState()));
 
+
+    tagNames.forEach((tag) {
+      allTags.add(TagContainer(
+        title: tag, 
+        selectedTags: selectedTags, 
+        isSelected: selectedTags.contains(tag), 
+        isFilterItem: false, 
+        selectedFilterTags: [],
+        updateParentState: ()=> updateParentState()));
+      filterTags.add(TagContainer(
+        title: tag,
+        selectedTags: selectedFilterTags,
+        isSelected: selectedFilterTags.contains(tag),
+        isFilterItem: true,
+        selectedFilterTags: selectedFilterTags,
+        updateParentState: () => updateParentState()));
+    });
+
+
+    
     return Scaffold(
       body: Row(
         children: <Widget>[
@@ -180,30 +154,7 @@ class _MainScreenState extends State<MainScreen> {
                                         context: context,
                                         builder: (BuildContext context) {
                                           TextEditingController pwController = TextEditingController();
-                                          return Dialog(
-                                            child: SizedBox(
-                                              height: MediaQuery.of(context).size.height / 3,
-                                              width: MediaQuery.of(context).size.width / 4,
-                                              child: Column(
-                                                children: [
-                                                  const Text("Enter your master password."),
-                                                  TextField(controller: pwController),
-                                                  ElevatedButton(
-                                                      onPressed: () {
-                                                        String pwText = pwController.text;
-                                                        if (pwText != "test") {
-                                                          return;
-                                                        } else {
-                                                          setActive(index);
-                                                          pwController.text = "";
-                                                          Navigator.of(context).pop();
-                                                        }
-                                                      },
-                                                      child: const Text("Submit"))
-                                                ],
-                                              ),
-                                            ),
-                                          );
+                                          return MasterPWDialog(pwController: pwController, onPasswordValidated: ()=> makePasswordVisibleIfValidatedAndPop(pwController, index));
                                         });
                                   }
                                 },
@@ -338,38 +289,7 @@ class _MainScreenState extends State<MainScreen> {
                 context: context,
                 builder: (BuildContext context) {
                   TextEditingController pwController = TextEditingController();
-                  return Dialog(
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height / 3,
-                      width: MediaQuery.of(context).size.width / 4,
-                      child: Column(
-                        children: [
-                          const Text("Enter your master password."),
-                          TextField(controller: pwController),
-                          ElevatedButton(
-                              onPressed: () {
-                                // TODO mabe check for master password
-                                String pwText = pwController.text;
-                                if (pwText != "test") {
-                                  return;
-                                } else {
-                                  Navigator.of(context).pop();
-                                  addItemToStore(newItem, pwText);
-                                  pwController.text = "";
-                                  setState(() {
-                                    selectedTags = [];
-                                    aliasController.text = "";
-                                    usernameController.text = "";
-                                    urlController.text = "";
-                                    passwordController.text = "";
-                                  });
-                                }
-                              },
-                              child: const Text("Submit"))
-                        ],
-                      ),
-                    ),
-                  );
+                  return MasterPWDialog(pwController: pwController, onPasswordValidated: ()=> resetInputFieldsAndPop(newItem, pwController, selectedTags),);
                 });
             //await addItemToStore(newItem);
           } else {
@@ -381,6 +301,31 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
+
+  //for adding a new storeitem
+  void resetInputFieldsAndPop(StoreItem item, TextEditingController masterPwController, List<String> selectedTags){
+    Navigator.of(context).pop();
+    addItemToStore(item, masterPwController.text);
+    masterPwController.text = "";
+    setState(() {
+      selectedTags = [];
+      aliasController.text = "";
+      usernameController.text = "";
+      urlController.text = "";
+      passwordController.text = "";
+    });
+  }
+
+  //for making a pw visible
+  void makePasswordVisibleIfValidatedAndPop(TextEditingController masterPwController, int index){
+    setState(() {
+      setActive(index);
+      masterPwController.text = "";
+      debugPrint(masterPwController.text);
+      Navigator.of(context).pop();
+    });
+  }
+
 
   bool validateInputs() {
     if (_aliasErrorText != null) {
@@ -398,173 +343,10 @@ class _MainScreenState extends State<MainScreen> {
     return true;
   }
 
-// NOT USED TODO remove
-  Widget openMasterPWDialog(BuildContext context, VoidCallback function) {
-    TextEditingController pwController = TextEditingController();
-    return Dialog(
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height / 3,
-        width: MediaQuery.of(context).size.width / 4,
-        child: Column(
-          children: [
-            const Text("Enter your master password."),
-            TextField(controller: pwController),
-            ElevatedButton(
-                onPressed: () {
-                  String pwText = pwController.text;
-                  if (pwText != "test") {
-                    return;
-                  } else {
-                    function();
-                    pwController.text = "";
-                    Navigator.of(context).pop();
-                  }
-                },
-                child: const Text("Submit"))
-          ],
-        ),
-      ),
-    );
-  }
+
 }
 
-class EditPasswordDialog extends StatelessWidget {
-  const EditPasswordDialog({
-    Key? key,
-    required this.item,
-    required this.updateParentState,
-  }) : super(key: key);
-  final StoreItem item;
-  final Function updateParentState;
 
-  @override
-  Widget build(BuildContext context) {
-    TextEditingController aliasController = TextEditingController();
-    TextEditingController urlController = TextEditingController();
-    TextEditingController usernameController = TextEditingController();
-    TextEditingController passwordController = TextEditingController();
-
-    aliasController.text = item.identifier;
-    urlController.text = item.url;
-    usernameController.text = item.username;
-    passwordController.text = item.password;
-
-    FlutterSecureStorage storage = const FlutterSecureStorage();
-
-    void safeNewEntry() {
-      //TODO: some validation
-      String alias = aliasController.text;
-      String url = urlController.text;
-      String username = usernameController.text;
-      String password = passwordController.text;
-      List<String> tags = item.tags;
-
-      StoreItem updatedItem = StoreItem(item.uid, alias, url, username, password, tags);
-      var updatedItemJson = jsonEncode(updatedItem);
-      storage.write(key: item.uid, value: updatedItemJson.toString());
-
-      Navigator.pop(context);
-      updateParentState();
-    }
-
-    return Dialog(
-        child: Column(
-      children: [
-        TextField(controller: aliasController),
-        TextField(controller: urlController),
-        TextField(controller: usernameController),
-        TextField(controller: passwordController),
-        Row(
-          children: [
-            TagContainer(
-                title: "Shopping",
-                selectedTags: item.tags,
-                isSelected: item.tags.contains("Shopping"),
-                isFilterItem: false,
-                updateParentState: () => () {}),
-            TagContainer(
-                title: "Social Media",
-                selectedTags: item.tags,
-                isSelected: item.tags.contains("Social Media"),
-                isFilterItem: false,
-                updateParentState: () => () {}),
-            TagContainer(
-                title: "Other",
-                selectedTags: item.tags,
-                isSelected: item.tags.contains("Other"),
-                isFilterItem: false,
-                updateParentState: () => () {}),
-            TagContainer(
-                title: "Porn",
-                selectedTags: item.tags,
-                isSelected: item.tags.contains("Porn"),
-                isFilterItem: false,
-                updateParentState: () => () {}),
-          ],
-        ),
-        Row(
-          children: [
-            ElevatedButton(onPressed: () => Navigator.of(context).pop(), child: const Text("cancel")),
-            ElevatedButton(onPressed: () => safeNewEntry(), child: const Text("save"))
-          ],
-        )
-      ],
-    ));
-  }
-}
-
-class TagContainer extends StatefulWidget {
-  final String title;
-  final List<String> selectedTags;
-  bool isSelected;
-  bool isFilterItem;
-  Function updateParentState;
-  TagContainer({
-    required this.title,
-    required this.selectedTags,
-    required this.isSelected,
-    required this.isFilterItem,
-    required this.updateParentState,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  State<TagContainer> createState() => _TagContainerState();
-}
-
-class _TagContainerState extends State<TagContainer> {
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => setState(() {
-        if (widget.isSelected) {
-          widget.isSelected = false;
-          widget.selectedTags.remove(widget.title);
-
-          if (widget.isFilterItem) {
-            selectedFilterTags.remove(widget.title);
-            widget.updateParentState();
-          }
-        } else {
-          widget.isSelected = true;
-          widget.selectedTags.add(widget.title);
-          if (widget.isFilterItem) {
-            selectedFilterTags.add(widget.title);
-            widget.updateParentState();
-          }
-        }
-      }),
-      child: Container(
-        decoration: BoxDecoration(
-            color: widget.isSelected ? Colors.green : Colors.grey, borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Center(child: Text(widget.title)),
-        ),
-      ),
-    );
-  }
-}
 
 Future<void> addItemToStore(StoreItem item, String masterPassword) async {
   // encrypt the password with the master password
