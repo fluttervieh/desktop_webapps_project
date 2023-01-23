@@ -1,15 +1,14 @@
-
 class StoreItem {
   final String uid;
   final String identifier;
   final String url;
   final String username;
-  final String password;
+  String password;
   final List<String> tags;
 
-  const StoreItem(this.uid, this.identifier, this.url, this.username, this.password, this.tags);
+  StoreItem(this.uid, this.identifier, this.url, this.username, this.password, this.tags);
 
-  set password(String value) {
+  set setPassword(String value) {
     password = value;
   }
 

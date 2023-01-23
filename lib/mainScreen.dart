@@ -80,32 +80,28 @@ class _MainScreenState extends State<MainScreen> {
       });
     }
 
-
     List<String> tagNames = ["Shopping", "Social Media", "Other", "Porn"];
     List<String> selectedTags = [];
     List<Widget> allTags = [];
     List<Widget> filterTags = [];
 
-
     tagNames.forEach((tag) {
       allTags.add(TagContainer(
-        title: tag, 
-        selectedTags: selectedTags, 
-        isSelected: selectedTags.contains(tag), 
-        isFilterItem: false, 
-        selectedFilterTags: [],
-        updateParentState: ()=> updateParentState()));
+          title: tag,
+          selectedTags: selectedTags,
+          isSelected: selectedTags.contains(tag),
+          isFilterItem: false,
+          selectedFilterTags: [],
+          updateParentState: () => updateParentState()));
       filterTags.add(TagContainer(
-        title: tag,
-        selectedTags: selectedFilterTags,
-        isSelected: selectedFilterTags.contains(tag),
-        isFilterItem: true,
-        selectedFilterTags: selectedFilterTags,
-        updateParentState: () => updateParentState()));
+          title: tag,
+          selectedTags: selectedFilterTags,
+          isSelected: selectedFilterTags.contains(tag),
+          isFilterItem: true,
+          selectedFilterTags: selectedFilterTags,
+          updateParentState: () => updateParentState()));
     });
 
-
-    
     return Scaffold(
       body: Row(
         children: <Widget>[
@@ -154,7 +150,10 @@ class _MainScreenState extends State<MainScreen> {
                                         context: context,
                                         builder: (BuildContext context) {
                                           TextEditingController pwController = TextEditingController();
-                                          return MasterPWDialog(pwController: pwController, onPasswordValidated: ()=> makePasswordVisibleIfValidatedAndPop(pwController, index));
+                                          return MasterPWDialog(
+                                              pwController: pwController,
+                                              onPasswordValidated: () =>
+                                                  makePasswordVisibleIfValidatedAndPop(pwController, index));
                                         });
                                   }
                                 },
@@ -175,6 +174,8 @@ class _MainScreenState extends State<MainScreen> {
                                                         style: const TextStyle(fontWeight: FontWeight.bold)),
                                                     Text(snapshot.data[index].url),
                                                     Text("username: " + snapshot.data[index].username),
+                                                    // show the password in plain
+                                                    Text("passwordPlain: " + snapshot.data[index].password),
 
                                                     // TODO use decrypt instead of decryptLocal
                                                     // TODO use master password instead of test
@@ -207,10 +208,15 @@ class _MainScreenState extends State<MainScreen> {
                                               child: IconButton(
                                                 icon: const Icon(Icons.delete),
                                                 onPressed: () {
-                                                  showDialog(context: context, builder: (BuildContext context){
-                                                      TextEditingController pwController = TextEditingController();
-                                                      return MasterPWDialog(pwController: pwController, onPasswordValidated: ()=> closeDialogifPasswordDeleted(pwController, snapshot.data[index].uid));
-                                                  });
+                                                  showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext context) {
+                                                        TextEditingController pwController = TextEditingController();
+                                                        return MasterPWDialog(
+                                                            pwController: pwController,
+                                                            onPasswordValidated: () => closeDialogifPasswordDeleted(
+                                                                pwController, snapshot.data[index].uid));
+                                                      });
                                                 },
                                               ),
                                             ),
@@ -289,7 +295,10 @@ class _MainScreenState extends State<MainScreen> {
                 context: context,
                 builder: (BuildContext context) {
                   TextEditingController pwController = TextEditingController();
-                  return MasterPWDialog(pwController: pwController, onPasswordValidated: ()=> resetInputFieldsAndPop(newItem, pwController, selectedTags),);
+                  return MasterPWDialog(
+                    pwController: pwController,
+                    onPasswordValidated: () => resetInputFieldsAndPop(newItem, pwController, selectedTags),
+                  );
                 });
             //await addItemToStore(newItem);
           } else {
@@ -303,7 +312,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   //for adding a new storeitem
-  void resetInputFieldsAndPop(StoreItem item, TextEditingController masterPwController, List<String> selectedTags){
+  void resetInputFieldsAndPop(StoreItem item, TextEditingController masterPwController, List<String> selectedTags) {
     Navigator.of(context).pop();
     addItemToStore(item, masterPwController.text);
     masterPwController.text = "";
@@ -317,7 +326,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   //for making a pw visible
-  void makePasswordVisibleIfValidatedAndPop(TextEditingController masterPwController, int index){
+  void makePasswordVisibleIfValidatedAndPop(TextEditingController masterPwController, int index) {
     setState(() {
       setActive(index);
       masterPwController.text = "";
@@ -326,7 +335,7 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  void closeDialogifPasswordDeleted(TextEditingController masterPWController, String uid){
+  void closeDialogifPasswordDeleted(TextEditingController masterPWController, String uid) {
     setState(() {
       storage.delete(key: uid);
       Navigator.pop(context);
@@ -348,17 +357,15 @@ class _MainScreenState extends State<MainScreen> {
     }
     return true;
   }
-
-
 }
-
-
 
 Future<void> addItemToStore(StoreItem item, String masterPassword) async {
   // encrypt the password with the master password
 
-  // TODO check encryption
-  // item.password = await Encryptdecrypt.encrypt(masterPassword, item.password);
+  String encryptedPassword = await Encryptdecrypt.encrypt(masterPassword, item.password);
+  debugPrint(encryptedPassword);
+  item.setPassword = encryptedPassword;
+
   var json = jsonEncode(item);
   await storage.write(key: item.uid, value: json.toString());
 }

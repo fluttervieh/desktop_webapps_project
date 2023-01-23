@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:desktop_webapp/mainScreen.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -16,8 +17,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'PW Manager',
       theme: ThemeData(
-        primarySwatch: Platform.isWindows? Colors.blue : Colors.deepOrange
-      ),
+          primarySwatch: kIsWeb
+              ? Colors.green
+              : Platform.isWindows
+                  ? Colors.blue
+                  : Colors.deepOrange),
       home: const MyHomePage(title: 'PW Manager Home Page'),
     );
   }
