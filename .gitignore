@@ -48,3 +48,5 @@ pubspec.lock
 ios/Podfile
 pubspec.lock
 windows/flutter/generated_plugins.cmake
+.flutter-plugins
+.flutter-plugins-dependencies

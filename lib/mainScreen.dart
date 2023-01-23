@@ -3,13 +3,16 @@ import 'package:desktop_webapp/ModelClasses/StoreItem.dart';
 import 'package:desktop_webapp/widgets/EditPasswordDialog.dart';
 import 'package:desktop_webapp/widgets/MasterPWDialog.dart';
 import 'package:desktop_webapp/widgets/TagContainer.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:desktop_webapp/encryptdecrypt.dart';
 import 'dart:io' show Platform;
 
 final storage = FlutterSecureStorage();
+
 List<String> selectedFilterTags = [];
 String searchCredential = "";
 
@@ -335,9 +338,20 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  void closeDialogifPasswordDeleted(TextEditingController masterPWController, String uid) {
-    setState(() {
+  Future<void> closeDialogifPasswordDeleted(TextEditingController masterPWController, String uid) async {
+    if (!kIsWeb && Platform.isMacOS) {
+      final SharedPreferences macStorage = await SharedPreferences.getInstance();
+
+      List<String>? items = macStorage.getStringList('passwordIds');
+      items ??= [];
+      items.remove(uid);
+      macStorage.setStringList('passwordIds', items);
+      macStorage.remove(uid);
+    } else {
       storage.delete(key: uid);
+    }
+
+    setState(() {
       Navigator.pop(context);
     });
   }
@@ -367,14 +381,38 @@ Future<void> addItemToStore(StoreItem item, String masterPassword) async {
   item.setPassword = encryptedPassword;
 
   var json = jsonEncode(item);
-  await storage.write(key: item.uid, value: json.toString());
+  if (!kIsWeb && Platform.isMacOS) {
+    // use alternative storage
+    final SharedPreferences macStorage = await SharedPreferences.getInstance();
+    List<String>? items = macStorage.getStringList('passwordIds');
+    items ??= [];
+    items.add(item.uid);
+    macStorage.setStringList('passwordIds', items);
+    macStorage.setString(item.uid, json.toString());
+  } else {
+    await storage.write(key: item.uid, value: json.toString());
+  }
 }
 
 //Diese funktion ist sehr schrecklich geschrieben, tut mir leid :-(
 Future<List<StoreItem>> getAllFromStorage(List<String> selectedFilterTags) async {
   List<StoreItem> fetchedStoreItems = [];
   //await storage.deleteAll();
-  final all = await storage.readAll();
+  Map<String, String> all = {};
+
+  if (!kIsWeb && Platform.isMacOS) {
+    // use alternative storage
+    final macStorage = await SharedPreferences.getInstance();
+    List<String>? keys = macStorage.getStringList("passwordIds");
+    // for every item in password list read storage
+    if (keys != null) {
+      keys.forEach((key) {
+        all[key] = macStorage.getString(key)!;
+      });
+    }
+  } else {
+    all = await storage.readAll();
+  }
 
   all.forEach((key, value) {
     StoreItem item = StoreItem.fromJson(jsonDecode(value));

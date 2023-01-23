@@ -1,10 +1,12 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../ModelClasses/StoreItem.dart';
 import 'TagContainer.dart';
+import 'dart:io' show Platform;
 
 class EditPasswordDialog extends StatelessWidget {
   const EditPasswordDialog({
@@ -29,7 +31,7 @@ class EditPasswordDialog extends StatelessWidget {
 
     FlutterSecureStorage storage = const FlutterSecureStorage();
 
-    void safeNewEntry() {
+    Future<void> safeNewEntry() async {
       //TODO: some validation
       String alias = aliasController.text;
       String url = urlController.text;
@@ -39,11 +41,31 @@ class EditPasswordDialog extends StatelessWidget {
 
       StoreItem updatedItem = StoreItem(item.uid, alias, url, username, password, tags);
       var updatedItemJson = jsonEncode(updatedItem);
-      storage.write(key: item.uid, value: updatedItemJson.toString());
+
+      if (!kIsWeb && Platform.isMacOS) {
+        // use alternative storage
+        final SharedPreferences macStorage = await SharedPreferences.getInstance();
+        macStorage.setString(item.uid, updatedItemJson.toString());
+      } else {
+        await storage.write(key: item.uid, value: updatedItemJson.toString());
+      }
 
       Navigator.pop(context);
       updateParentState();
     }
+
+    List<String> tagNames = ["Shopping", "Social Media", "Other", "Porn"];
+    List<Widget> allTags = [];
+
+    tagNames.forEach((tag) {
+      allTags.add(TagContainer(
+          title: tag,
+          selectedTags: item.tags,
+          isSelected: item.tags.contains(tag),
+          isFilterItem: false,
+          selectedFilterTags: [],
+          updateParentState: () => () {}));
+    });
 
     return Dialog(
         child: Column(
@@ -53,36 +75,7 @@ class EditPasswordDialog extends StatelessWidget {
         TextField(controller: usernameController),
         TextField(controller: passwordController),
         Row(
-          children: [
-            TagContainer(
-                title: "Shopping",
-                selectedTags: item.tags,
-                isSelected: item.tags.contains("Shopping"),
-                isFilterItem: false,
-                selectedFilterTags: [],
-                updateParentState: () => () {}),
-            TagContainer(
-                title: "Social Media",
-                selectedTags: item.tags,
-                isSelected: item.tags.contains("Social Media"),
-                isFilterItem: false,
-                selectedFilterTags: [],
-                updateParentState: () => () {}),
-            TagContainer(
-                title: "Other",
-                selectedTags: item.tags,
-                isSelected: item.tags.contains("Other"),
-                isFilterItem: false,
-                selectedFilterTags: [],
-                updateParentState: () => () {}),
-            TagContainer(
-                title: "Porn",
-                selectedTags: item.tags,
-                isSelected: item.tags.contains("Porn"),
-                isFilterItem: false,
-                selectedFilterTags: [],
-                updateParentState: () => () {}),
-          ],
+          children: allTags,
         ),
         Row(
           children: [
