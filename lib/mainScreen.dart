@@ -156,7 +156,7 @@ class _MainScreenState extends State<MainScreen> {
                                           return MasterPWDialog(
                                               pwController: pwController,
                                               onPasswordValidated: () =>
-                                                  makePasswordVisibleIfValidatedAndPop(pwController, index));
+                                                  makePasswordVisibleIfValidatedAndPop(pwController, index, MasterPWDialog.showPWController, snapshot.data[index]), isShowPasswordDialog: true,);
                                         });
                                   }
                                 },
@@ -218,7 +218,7 @@ class _MainScreenState extends State<MainScreen> {
                                                         return MasterPWDialog(
                                                             pwController: pwController,
                                                             onPasswordValidated: () => closeDialogifPasswordDeleted(
-                                                                pwController, snapshot.data[index].uid));
+                                                                pwController, snapshot.data[index].uid), isShowPasswordDialog: false,);
                                                       });
                                                 },
                                               ),
@@ -300,7 +300,7 @@ class _MainScreenState extends State<MainScreen> {
                   TextEditingController pwController = TextEditingController();
                   return MasterPWDialog(
                     pwController: pwController,
-                    onPasswordValidated: () => resetInputFieldsAndPop(newItem, pwController, selectedTags),
+                    onPasswordValidated: () => resetInputFieldsAndPop(newItem, pwController, selectedTags), isShowPasswordDialog: false,
                   );
                 });
             //await addItemToStore(newItem);
@@ -329,12 +329,13 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   //for making a pw visible
-  void makePasswordVisibleIfValidatedAndPop(TextEditingController masterPwController, int index) {
-    setState(() {
-      setActive(index);
+  Future<void> makePasswordVisibleIfValidatedAndPop(TextEditingController masterPwController, int index, TextEditingController showMasterPassword, StoreItem item) async  {
+    String masterPW = masterPwController.text;
+    String encryptedPW = await Encryptdecrypt.decrypt(masterPW, item.password);
+
+    setState(()  {
       masterPwController.text = "";
-      debugPrint(masterPwController.text);
-      Navigator.of(context).pop();
+      showMasterPassword.text = encryptedPW;
     });
   }
 
