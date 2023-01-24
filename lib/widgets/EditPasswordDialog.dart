@@ -54,7 +54,7 @@ class EditPasswordDialog extends StatelessWidget {
       updateParentState();
     }
 
-    List<String> tagNames = ["Shopping", "Social Media", "Other", "Porn"];
+    List<String> tagNames = ["Shopping", "Social Media", "Corn", "Other"];
     List<Widget> allTags = [];
 
     tagNames.forEach((tag) {

@@ -1,39 +1,37 @@
-# desktop_webapp
+# PW Manager
 
-A new Flutter project.
+A Fluttter Desktop PW Manager
 
-## Getting Started
+Supportet Plattforms
+- Windows
+- Macos (10.13+)
+- Web
 
-This project is a starting point for a Flutter application.
+by
+- Richard Lorenz
+- Stefan Beller
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+**in the Lecture Desktop Web Applications**
 
 ## TODOs
-- [ ] beispiel für platformspezifische designanpassungen 
+- [x] beispiel für platformspezifische designanpassungen 
 - [x] jeder eintrag sollte folgende felder haben
     - [x] titel
     - [x] username
     - [x] password
     - [x] url
-- [ ] alle credentials sollten aufgelistet werden können
+- [x] alle credentials sollten aufgelistet werden können
 - [x] eintrag hinzufügen
-- [ ] eintrag bearbeiten
+- [x] eintrag bearbeiten
 - [x] eintrag löschen
 - [x] tags zu einträgen hinzufügen
-- [ ] liste filtern
+- [x] liste filtern
     - [x] über tags
-    - [ ] über titel
-- [ ] passwort verschlüsselt speichern
+    - [x] über titel
+- [x] passwort verschlüsselt speichern
     - [x] idealerweise mit anderer programmiersprache (webasembly)
     - [x] entschlüsseln beim lesen (mit masterpasswort?)
-    - [ ] integration in programm
+    - [x] integration in programm
 - [x] Testing
     - [x] Unit Tests
     - [x] UI Tests
@@ -79,18 +77,19 @@ To run the tests
 
 # Open TODO Points
 
-- cleanup code (remove unused code(main.dart))
-- remove android, ios and (web?)
 - build windows and mac deployment (flutter build)
-- Titel bearbeiten
-- reformat code
 - test on windows
 - password class integrate
-- is it really working on macos??
+- encrypt password only once (issue with lag in application)
+- edit dialog - make password editable
+
+Not to do
+- add own category
 
 # Known issues
 
 - Decrypt / Encrypt (there are some known issues but the goal (try to execute some code in a other language) should be reached)
-    - the Decrypt function on macos has a bug but the details are currently unknown - it is handled by the local decryption implementation
-    - the Encrypt / Decrypt on Windows is not finished implementing
-
+    - the Encrypt / Decrypt on Windows was startet to implement but not finished and is therefore not delivered
+        - it works with the dart encode / decode implementation
+    - in the filter field tags or text can be filtered
+    - password can not be edited at the moment

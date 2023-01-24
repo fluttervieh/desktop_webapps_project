@@ -83,7 +83,7 @@ class _MainScreenState extends State<MainScreen> {
       });
     }
 
-    List<String> tagNames = ["Shopping", "Social Media", "Other", "Porn"];
+    List<String> tagNames = ["Shopping", "Social Media", "Corn", "Other"];
     List<String> selectedTags = [];
     List<Widget> allTags = [];
     List<Widget> filterTags = [];
