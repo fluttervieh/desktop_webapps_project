@@ -13,38 +13,15 @@ by
 
 **in the Lecture Desktop Web Applications**
 
-## What needs to be done.
-- [x] beispiel für platformspezifische designanpassungen 
-- [x] jeder eintrag sollte folgende felder haben
-    - [x] titel
-    - [x] username
-    - [x] password
-    - [x] url
-- [x] alle credentials sollten aufgelistet werden können
-- [x] eintrag hinzufügen
-- [x] eintrag bearbeiten
-- [x] eintrag löschen
-- [x] tags zu einträgen hinzufügen
-- [x] liste filtern
-    - [x] über tags
-    - [x] über titel
-- [x] passwort verschlüsselt speichern
-    - [x] idealerweise mit anderer programmiersprache (webasembly)
-    - [x] entschlüsseln beim lesen (mit masterpasswort?)
-    - [x] integration in programm
-- [x] Testing
-    - [x] Unit Tests
-    - [x] UI Tests
-- [x] Readme.md mit how to start the application
-
-
 # How to start the application
 
 To start the application Production and Development mode are available.
 
+Note: the master password ist **test**
+
 ## Production
 
-For windows and Mac 2 executables are packed inside of the productionApplications folder. They can be executed right away.
+For windows and Mac (arm64) 2 executables are packed inside of the productionApplications folder. They can be executed right away.
 
 ## Development
 
@@ -75,6 +52,30 @@ To run the application
 To run the tests 
     - select the Target Device in the lower left corner in VS Code.
     - in the test directory select a test and above the void main method click on run
+
+## TODOs
+- [x] beispiel für platformspezifische designanpassungen 
+- [x] jeder eintrag sollte folgende felder haben
+    - [x] titel
+    - [x] username
+    - [x] password
+    - [x] url
+- [x] alle credentials sollten aufgelistet werden können
+- [x] eintrag hinzufügen
+- [x] eintrag bearbeiten
+- [x] eintrag löschen
+- [x] tags zu einträgen hinzufügen
+- [x] liste filtern
+    - [x] über tags
+    - [x] über titel
+- [x] passwort verschlüsselt speichern
+    - [x] idealerweise mit anderer programmiersprache (webasembly)
+    - [x] entschlüsseln beim lesen (mit masterpasswort?)
+    - [x] integration in programm
+- [x] Testing
+    - [x] Unit Tests
+    - [x] UI Tests
+- [x] Readme.md mit how to start the application
 
 # Known issues
 
