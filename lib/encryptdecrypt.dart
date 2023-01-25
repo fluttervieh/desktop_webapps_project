@@ -7,7 +7,7 @@ import 'dart:io';
 class Encryptdecrypt {
   static Future<String> encrypt(String key, String password) async {
     // mac platform
-    if (!kIsWeb && Platform.isMacOS) {
+    if (!kIsWeb && Platform.isMacOS || Platform.isWindows) {
       const platform = MethodChannel('pwmanager/encdecrypt');
       try {
         String ret = await platform.invokeMethod('encrypt', [key, password]);
@@ -30,7 +30,7 @@ class Encryptdecrypt {
 
   static Future<String> decrypt(String key, String encryptedPassword) async {
     // mac platform
-    if (!kIsWeb && Platform.isMacOS) {
+    if (!kIsWeb && Platform.isMacOS || Platform.isWindows) {
       const platform = MethodChannel('pwmanager/encdecrypt');
       try {
         String ret = await platform.invokeMethod('decrypt', [key, encryptedPassword]);
